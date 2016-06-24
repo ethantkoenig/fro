@@ -194,3 +194,40 @@ class TwinParser(AbstractParser):
 
     def _chomp(self, s, index, fail_hard):
         return self._twin._chomp(s, index, fail_hard)
+
+def nested(open_regex_string, close_regex_string):
+    return NestedParser(open_regex_string, close_regex_string)
+
+class NestedParser(AbstractParser):
+
+    def __init__(self, open_regex_string, close_regex_string):
+        AbstractParser.__init__(self)
+        self._init_regex = re.compile(open_regex_string)
+        self._open_regex = re.compile(r".*?" + open_regex_string)
+        self._close_regex = re.compile(r".*?" + close_regex_string)
+
+    def _chomp(self, s, index, fail_hard):
+        init_match = self._init_regex.match(s, index)
+        if init_match is None:
+            self._quit(index, fail_hard)
+        start_index = index = init_match.end()
+        nesting_level = 1
+        while nesting_level > 0:
+            end_index = index
+            open_match = self._open_regex.match(s, index)
+            close_match = self._close_regex.match(s, index)
+            if open_match is None and close_match is None:
+                return self._quit(index, fail_hard)
+            elif open_match is None:
+                index = close_match.end()
+                nesting_level -= 1
+            elif close_match is None:
+                index = open_match.end()
+                nesting_level += 1
+            elif close_match.end() < open_match.end():
+                index = close_match.end()
+                nesting_level -= 1
+            else:
+                index = open_match.end()
+                nesting_level += 1
+        return s[start_index:end_index], index
