@@ -17,16 +17,17 @@ class AbstractParser(object):
     Immutable.
 
     FIELDS:
-    _err - formatted string for error msg in event of parse error 
+    _err - formatted string for error msg in event of parse error
     _fertile(bool) - if the parser produces a meaningful value. defaults to True
     """
-    def __init__(self, fertile = True, err = None):
+    def __init__(self, fertile=True, err=None):
         self._fertile = fertile
         self._err = err
 
     def parse(self, s):
         chomp_result = self._chomp(s, 0, True)
-        if chomp_result is None: return self._quit(0, True)
+        if chomp_result is None:
+            return self._quit(0, True)
         value, index = chomp_result
         return value if index == len(s) else self._quit(0, True)
 
@@ -64,10 +65,10 @@ class AbstractParser(object):
         RETURNS:
           (t, str), or None
         """
-        return self._quit(index) if fail_hard else None # must be implemented by subclasses
+        return self._quit(index, fail_hard) # must be implemented by subclasses
 
 
-def compose(parsers, reducer = lambda *x : x):
+def compose(parsers, reducer=lambda *x: x):
     return CompositionParser(parsers, reducer)
 
 class CompositionParser(AbstractParser):
@@ -89,25 +90,26 @@ class CompositionParser(AbstractParser):
                 values.append(value)
         return self._reducer(*tuple(values)), index
 
-def rgx(regex_string, func = None):
+def rgx(regex_string, func=None):
     return RegexParser(regex_string, func)
 
 class RegexParser(AbstractParser):
 
-    def __init__(self, regex_string, func = None):
+    def __init__(self, regex_string, func=None):
         fertile = True
         if regex_string[0:1] == "@":
             fertile = False
-            regex_string=regex_string[1:]
+            regex_string = regex_string[1:]
         elif regex_string[0:2] == "\\@":
-            regex_string="@"+regex_string[2:]
+            regex_string = "@"+regex_string[2:]
         AbstractParser.__init__(self, fertile)
         self._regex = re.compile(regex_string)
         self._func = func
 
     def _chomp(self, s, index, fail_hard):
         match = self._regex.match(s, index)
-        if match is None: return self._quit(index, fail_hard)
+        if match is None:
+            return self._quit(index, fail_hard)
         start_index = index
         end_index = match.end()
         matched = s[start_index:end_index]
@@ -118,24 +120,24 @@ class RegexParser(AbstractParser):
 class MapParser(AbstractParser):
 
     def __init__(self, parser, func):
+        AbstractParser.__init__(self)
         self._parser = parser
         self._func = func
 
     def _chomp(self, s, index, fail_hard):
         chomp_result = self._parser._chomp(s, index, fail_hard)
-        if chomp_result is None: return None
+        if chomp_result is None:
+            return None
         value, index = chomp_result
         return self._func(value), index
 
 
-# TODO
-
-def seq(value, separator = None, start = None, end = None):
+def seq(value, separator=None, start=None, end=None):
     return ListParser(value, separator, start, end)
 
 class ListParser(AbstractParser):
 
-    def __init__(self, values, separator = None, start = None, end = None):
+    def __init__(self, values, separator=None, start=None, end=None):
         AbstractParser.__init__(self)
         self.values = parser_of(values)
         self.separator = parser_of(separator) # may be None
@@ -152,7 +154,7 @@ class ListParser(AbstractParser):
         encountered_values = []
         chomp_result = self.values._chomp(s, index, True)
         if chomp_result is None:
-            if self.start is None: 
+            if self.start is None:
                 return [], index
             return self._quit(index, fail_hard)
         value, index = chomp_result
@@ -174,7 +176,7 @@ class ListParser(AbstractParser):
             if chomp_result is None:
                 return self._quit(index, fail_hard)
             _, index = chomp_result
-        return encountered_values, index 
+        return encountered_values, index
 
 class TwinParser(AbstractParser):
 
