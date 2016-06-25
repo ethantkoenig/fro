@@ -38,7 +38,7 @@ class AbstractFroParser(object):
     def err(self, err):
         """
         Set an error message, to be thrown on parse failures
-        :param err: A formatable string represent
+        :param err: error message to be thrown
         :return: a copy of the called parser, with set error message
         """
         carbon = copy.copy(self)
@@ -88,7 +88,7 @@ class AbstractFroParser(object):
         """
         if self._err is None or not fail_hard:
             return None
-        raise ValueError(self._err.format(index, i=index))
+        raise FroParseError(self._err, index)
 
     def _chomp(self, s, index, fail_hard):
         """
@@ -101,6 +101,20 @@ class AbstractFroParser(object):
                        if parse failed (and no exception was thrown)
         """
         return self._quit(index, fail_hard) # must be implemented by subclasses
+
+
+class FroParseError(StandardError):
+
+    def __init__(self, message, index):
+        self._message = message
+        self._index = index
+
+    def __str__(self):
+        return self._message
+
+    def index(self):
+        return self._index
+
 
 
 class MapFroParser(AbstractFroParser):

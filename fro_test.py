@@ -1,6 +1,9 @@
+import math
+import random
 import unittest
 
 import fro
+import fro_parser
 
 
 class FroTests(unittest.TestCase):
@@ -8,7 +11,7 @@ class FroTests(unittest.TestCase):
     def test_compose1(self):
         rgxs = [fro.rgx(str(x), int) for x in xrange(100)]
         rgxs = [++rgx if i % 2 == 0 else --rgx for i, rgx in enumerate(rgxs)]
-        parser = fro.compose(rgxs, lambda *x: sum(x))
+        parser = fro.compose(rgxs, reducer=lambda *x: sum(x))
         actual = parser.parse("".join(str(i) for i in xrange(100)))
         expected = sum(i for i in xrange(100) if i % 2 == 0)
         self.assertEqual(actual, expected)
@@ -23,7 +26,7 @@ class FroTests(unittest.TestCase):
     def test_compose3(self):
         rgxs = [r"ab*", "b+"]
         parser = fro.compose(rgxs).err("{}")
-        self.assertRaisesRegexp(ValueError, r"4", parser.parse, "abbb")
+        self.assertRaisesRegexp(fro_parser.FroParseError, "{}", parser.parse, "abbb")
 
     def test_nested1(self):
         inside = "(())()(())()"
@@ -79,6 +82,30 @@ class FroTests(unittest.TestCase):
         actual = num_seq.parse("")
         expected = []
         self.assertEquals(actual, expected)
+
+    def test_floatp(self):
+        for _ in xrange(1000):
+            f = random_float()
+            result = fro.floatp.parse(str(f))
+            self.assertTrue(abs(f - result) < 1e-6 or abs(f / result - 1) < 1e-6)
+
+    def test_intp(self):
+        for n in xrange(-10, 10):
+            self.assertEqual(fro.intp.parse(str(n)), n)
+        for _ in xrange(100):
+            n = random.getrandbits(100)
+            self.assertEqual(fro.intp.parse(str(n)), n)
+
+
+
+
+
+# utilities
+
+def random_float():
+    return math.exp(random.uniform(-200, 200))
+
+
 
 
 if __name__ == "__main__":
