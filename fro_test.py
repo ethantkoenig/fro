@@ -14,15 +14,20 @@ class FroTests(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_compose2(self):
-        rgxs = ["a+b+", "b+a+"]
+        rgxs = [r"a+b+", r"b+a+"]
         parser = fro.compose(rgxs)
         actual = parser.parse("aaabbaa")
         expected = None
         self.assertEqual(actual, expected)
 
+    def test_compose3(self):
+        rgxs = [r"ab*", "b+"]
+        parser = fro.compose(rgxs).err("{}")
+        self.assertRaisesRegexp(ValueError, r"4", parser.parse, "abbb")
+
     def test_nested1(self):
         inside = "(())()(())()"
-        nested_parser = fro.nested(r"\(", r"\)")
+        nested_parser = fro.nested(r"\(", r"\)").err("{}")
         parens = "({})".format(inside)
         actual = nested_parser.parse(parens)
         expected = inside
@@ -48,7 +53,7 @@ class FroTests(unittest.TestCase):
         num = fro.rgx(r"[0-9]+", int)
         num_seq = fro.seq(num, ",")
         for n in xrange(10):
-            actual = num_seq.parse(",".join(str(x) for x in range(n)))
+            actual = num_seq.err("").parse(",".join(str(x) for x in range(n)))
             expected = range(n)
             self.assertEqual(actual, expected)
         for n in xrange(10):
