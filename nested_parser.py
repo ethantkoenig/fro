@@ -2,6 +2,7 @@ import re
 
 from fro_parser import AbstractFroParser
 
+
 class NestedFroParser(AbstractFroParser):
 
     def __init__(self, open_regex_string, close_regex_string):

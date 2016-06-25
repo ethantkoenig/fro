@@ -28,6 +28,18 @@ class FroTests(unittest.TestCase):
         parser = fro.compose(rgxs).err("{}")
         self.assertRaisesRegexp(fro_parser.FroParseError, "{}", parser.parse, "abbb")
 
+    def test_group_rgx1(self):
+        parser = fro.group_rgx(r"(a)(b+).*")
+        self.assertEqual(parser.parse("abbbcde"), ("a", "bbb"))
+
+    def test_group_rgx2(self):
+        parser = fro.group_rgx(".*")
+        self.assertEqual(parser.parse("\t\t\t"), ())
+
+    def test_group_rgx3(self):
+        parser = fro.group_rgx("(a)(b)")
+        self.assertEqual(parser.parse("acdf"), None)
+
     def test_nested1(self):
         inside = "(())()(())()"
         nested_parser = fro.nested(r"\(", r"\)").err("{}")
