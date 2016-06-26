@@ -4,6 +4,8 @@ Extensible framework for fro parsers
 
 import copy
 
+import composition_parser
+
 class AbstractFroParser(object):
     """
     The abstract parent class which fro parsers should extend. This class should
@@ -52,6 +54,19 @@ class AbstractFroParser(object):
         if self._err is None:
             return self
         return self.err(None)
+
+    def lstrip(self):
+        if self._fertile:
+            return composition_parser.CompositionFroParser([r"@\s*", self], reducer=lambda x: x)
+        return -composition_parser.CompositionFroParser(["r@\s*", +self], reducer=lambda x: x)
+
+    def rstrip(self):
+        if self._fertile:
+            return composition_parser.CompositionFroParser([self, r"@\s*"], reducer=lambda x: x)
+        return -composition_parser.CompositionFroParser([+self, "r@\s*"], reducer=lambda x: x)
+
+    def strip(self):
+        return self.lstrip().rstrip()
 
     def __neg__(self):
         """
@@ -114,7 +129,6 @@ class FroParseError(StandardError):
 
     def index(self):
         return self._index
-
 
 
 class MapFroParser(AbstractFroParser):

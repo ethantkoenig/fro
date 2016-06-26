@@ -11,6 +11,7 @@ class SequenceFroParser(fro_parser.AbstractFroParser):
         self.end = fro_parser_utils.parser_of(end) # may be None
 
     def _chomp(self, s, index, fail_hard):
+        start_index = index
         if self.start is not None:
             chomp_result = self.start._chomp(s, index, False)
             if chomp_result is None:
@@ -18,28 +19,29 @@ class SequenceFroParser(fro_parser.AbstractFroParser):
             _, index = chomp_result
 
         encountered_values = []
-        chomp_result = self.values._chomp(s, index, True)
+        chomp_result = self.values._chomp(s, index, False)
         if chomp_result is None:
-            if self.start is None:
-                return [], index
-            return self._quit(index, fail_hard)
+            return [], start_index
         value, index = chomp_result
         encountered_values.append(value)
         while True:
+            rollback_index = index
             if self.separator is not None:
                 chomp_result = self.separator._chomp(s, index, False)
                 if chomp_result is None:
                     break
                 _, index = chomp_result
-            chomp_result = self.values._chomp(s, index, True)
+
+            chomp_result = self.values._chomp(s, index, False)
             if chomp_result is None:
-                return self._quit(index, fail_hard)
+                index = rollback_index
+                break
             value, index = chomp_result
             encountered_values.append(value)
 
         if self.end is not None:
-            chomp_result = self.end(s, index, True)
+            chomp_result = self.end._chomp(s, index, False)
             if chomp_result is None:
-                return self._quit(index, fail_hard)
+                return [], start_index
             _, index = chomp_result
         return encountered_values, index

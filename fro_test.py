@@ -77,7 +77,7 @@ class FroTests(unittest.TestCase):
             self.assertEqual(actual, expected)
 
     def test_seq2(self):
-        sq = fro.seq("a+?", separator="a")
+        sq = fro.seq("a+?", sep="a")
         for n in xrange(20):
             actual = sq.parse("a" * n)
             if n == 0:

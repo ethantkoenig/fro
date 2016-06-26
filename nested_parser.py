@@ -14,7 +14,7 @@ class NestedFroParser(AbstractFroParser):
     def _chomp(self, s, index, fail_hard):
         init_match = self._init_regex.match(s, index)
         if init_match is None:
-            self._quit(index, fail_hard)
+            return self._quit(index, fail_hard)
         start_index = index = init_match.end()
         nesting_level = 1
         while nesting_level > 0:

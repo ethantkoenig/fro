@@ -19,8 +19,8 @@ def nested(open_regex_string, close_regex_string):
 def rgx(regex_string, func=None):
     return RegexFroParser(regex_string, func)
 
-def seq(value, separator=None, start=None, end=None):
-    return SequenceFroParser(value, separator, start, end)
+def seq(value, sep=None, start=None, end=None):
+    return SequenceFroParser(value, sep, start, end)
 
 
 boolp = rgx(r"True|False", bool)
