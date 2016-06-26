@@ -19,14 +19,12 @@ class FroTests(unittest.TestCase):
     def test_compose2(self):
         rgxs = [r"a+b+", r"b+a+"]
         parser = fro.compose(rgxs)
-        actual = parser.parse("aaabbaa")
-        expected = None
-        self.assertEqual(actual, expected)
+        self.assertRaises(fro_parser.FroParseError, parser.parse, "aaabbaa")
 
     def test_compose3(self):
         rgxs = [r"ab*", "b+"]
-        parser = fro.compose(rgxs).err("{}")
-        self.assertRaisesRegexp(fro_parser.FroParseError, "{}", parser.parse, "abbb")
+        parser = fro.compose(rgxs)
+        self.assertRaises(fro_parser.FroParseError, parser.parse, "abbb")
 
     def test_group_rgx1(self):
         parser = fro.group_rgx(r"(a)(b+).*")
@@ -38,11 +36,11 @@ class FroTests(unittest.TestCase):
 
     def test_group_rgx3(self):
         parser = fro.group_rgx("(a)(b)")
-        self.assertEqual(parser.parse("acdf"), None)
+        self.assertRaises(fro_parser.FroParseError, parser.parse, "acdf")
 
     def test_nested1(self):
         inside = "(())()(())()"
-        nested_parser = fro.nested(r"\(", r"\)").err("{}")
+        nested_parser = fro.nested(r"\(", r"\)").name("nested parens")
         parens = "({})".format(inside)
         actual = nested_parser.parse(parens)
         expected = inside
@@ -64,11 +62,16 @@ class FroTests(unittest.TestCase):
         actual = nested_parser.parse(s)
         self.assertEqual(actual, expected)
 
+    def test_nested4(self):
+        s = "(()"
+        nested_parser = fro.nested(r"\(", r"\)")
+        self.assertRaises(fro_parser.FroParseError, nested_parser.parse, s)
+
     def test_seq1(self):
         num = fro.rgx(r"[0-9]+", int)
-        num_seq = fro.seq(num, ",")
+        num_seq = fro.seq(num, ",").quiet()
         for n in xrange(10):
-            actual = num_seq.err("").parse(",".join(str(x) for x in range(n)))
+            actual = num_seq.parse(",".join(str(x) for x in range(n)))
             expected = range(n)
             self.assertEqual(actual, expected)
         for n in xrange(10):
@@ -77,7 +80,7 @@ class FroTests(unittest.TestCase):
             self.assertEqual(actual, expected)
 
     def test_seq2(self):
-        sq = fro.seq("a+?", sep="a")
+        sq = fro.seq("a+?", sep="a").quiet()
         for n in xrange(20):
             actual = sq.parse("a" * n)
             if n == 0:
@@ -90,13 +93,13 @@ class FroTests(unittest.TestCase):
 
     def test_seq_empty(self):
         num = fro.rgx(r"[0-9]+", int)
-        num_seq = fro.seq(num, ",", start = r"\@")
-        actual = num_seq.parse("")
-        expected = []
+        num_seq = fro.seq(num, r",", sep_at_start=True).quiet()
+        actual = num_seq.parse("8,8")
+        expected = None
         self.assertEquals(actual, expected)
 
     def test_floatp(self):
-        for _ in xrange(1000):
+        for _ in xrange(100):
             f = random_float()
             result = fro.floatp.parse(str(f))
             self.assertTrue(abs(f - result) < 1e-6 or abs(f / result - 1) < 1e-6)
@@ -115,7 +118,8 @@ class FroTests(unittest.TestCase):
 # utilities
 
 def random_float():
-    return math.exp(random.uniform(-200, 200))
+    abs_val = math.exp(random.uniform(-200, 200))
+    return abs_val if random.random() < 0.5 else -abs_val
 
 
 

@@ -3,45 +3,42 @@ import fro_parser_utils
 
 class SequenceFroParser(fro_parser.AbstractFroParser):
 
-    def __init__(self, values, separator=None, start=None, end=None):
+    def __init__(self, element, separator=None, at_start=False, at_end=False):
         fro_parser.AbstractFroParser.__init__(self)
-        self.values = fro_parser_utils.parser_of(values)
-        self.separator = fro_parser_utils.parser_of(separator) # may be None
-        self.start = fro_parser_utils.parser_of(start) # may be None
-        self.end = fro_parser_utils.parser_of(end) # may be None
+        self._element = fro_parser_utils.parser_of(element)
+        self._separator = fro_parser_utils.parser_of(separator) # may be None
+        self._at_start = at_start and separator is not None
+        self._at_end = at_end and separator is not None
 
-    def _chomp(self, s, index, fail_hard):
-        start_index = index
-        if self.start is not None:
-            chomp_result = self.start._chomp(s, index, False)
+    def _chomp(self, s, index, logger):
+        rollback_index = index
+        if self._at_start:
+            chomp_result = self._separator._chomp(s, index, logger)
             if chomp_result is None:
-                return [], index
+                return None if self._at_end else [], rollback_index
             _, index = chomp_result
 
         encountered_values = []
-        chomp_result = self.values._chomp(s, index, False)
-        if chomp_result is None:
-            return [], start_index
-        value, index = chomp_result
-        encountered_values.append(value)
+        pending_value = None
         while True:
-            rollback_index = index
-            if self.separator is not None:
-                chomp_result = self.separator._chomp(s, index, False)
-                if chomp_result is None:
-                    break
-                _, index = chomp_result
-
-            chomp_result = self.values._chomp(s, index, False)
+            chomp_result = self._element._chomp(s, index, logger)
             if chomp_result is None:
-                index = rollback_index
-                break
+                return encountered_values, rollback_index
             value, index = chomp_result
-            encountered_values.append(value)
+            if self._at_end:
+                pending_value = value
+            else:
+                rollback_index = index
+                encountered_values.append(value)
 
-        if self.end is not None:
-            chomp_result = self.end._chomp(s, index, False)
-            if chomp_result is None:
-                return [], start_index
-            _, index = chomp_result
-        return encountered_values, index
+            if self._separator is not None:
+                chomp_result = self._separator._chomp(s, index, logger)
+                if chomp_result is None:
+                    return encountered_values, rollback_index
+                _, index = chomp_result
+                if self._at_end:
+                    rollback_index = index
+                    encountered_values.append(pending_value)
+                    pending_value = None
+
+

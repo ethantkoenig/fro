@@ -7,20 +7,25 @@ from sequence_parser import SequenceFroParser
 # --------------------------------------------------------------------
 # public interface
 
+
 def compose(parsers, sep=None, reducer=lambda *x: x):
     return CompositionFroParser(parsers, sep, reducer)
+
 
 def group_rgx(regex_string, reduce=lambda *x: x):
     return GroupRegexFroParser(regex_string, reduce)
 
+
 def nested(open_regex_string, close_regex_string):
     return NestedFroParser(open_regex_string, close_regex_string)
+
 
 def rgx(regex_string, func=None):
     return RegexFroParser(regex_string, func)
 
-def seq(value, sep=None, start=None, end=None):
-    return SequenceFroParser(value, sep, start, end)
+
+def seq(value, sep=None, sep_at_start=False, sep_at_end=False):
+    return SequenceFroParser(value, sep, sep_at_start, sep_at_end)
 
 
 boolp = rgx(r"True|False", bool)
