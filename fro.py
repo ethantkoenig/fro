@@ -1,5 +1,5 @@
-from fro_chomper import CompositionChomper, GroupRegexChomper, NestedChomper,\
-    RegexChomper, SequenceChomper
+from fro_chomper import AlternationChomper, CompositionChomper, GroupRegexChomper,\
+    NestedChomper, RegexChomper, SequenceChomper
 
 
 import fro_parse_error
@@ -10,6 +10,10 @@ from fro_parser import FroParser
 
 FroParseError = fro_parse_error.FroParseError
 
+
+def alt(parsers):
+    chompers = [_extract(parser) for parser in parsers]
+    return FroParser(AlternationChomper(chompers))
 
 def compose(parsers, sep=None, reducer=lambda *x: x):
     chompers = [_extract(parser) for parser in parsers]

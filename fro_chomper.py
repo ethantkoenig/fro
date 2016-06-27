@@ -21,6 +21,26 @@ class AbstractChomper(object):
         self._name = name
         self._quiet = quiet
 
+    def fertile(self):
+        return self._fertile
+
+    def name(self):
+        return self._name
+
+    def quiet(self):
+        return self._quiet
+
+    def chomp(self, s, index, tracker):
+        """
+        Parses the head of the string s, possibly "chomping" off the beginnig
+        of s and producing a value
+        :param s: string to parse
+        :param index: index of s to start at
+        :param tracker: FroParseErrorTracker - tracks encountered errors
+        :return: (t, index) : value parsed, and first "unconsumed" index
+        """
+        return None  # must be implemented by subclasses
+
     # internals
     @staticmethod
     def _apply(start_index, end_index, func, *args):
@@ -46,16 +66,6 @@ class AbstractChomper(object):
         msg = base_msg if self._name is None else "{} when parsing {}".format(base_msg, self._name)
         tracker.report_error(fro_parse_error.FroParseError(msg, start_index, end_index))
 
-    def _chomp(self, s, index, tracker):
-        """
-        Parses the head of the string s, possibly "chomping" off the beginnig
-        of s and producing a value
-        :param s: string to parse
-        :param index: index of s to start at
-        :param tracker: FroParseErrorTracker - tracks encountered errors
-        :return: (t, index) : value parsed, and first "unconsumed" index
-        """
-        return None  # must be implemented by subclasses
 
 
 class FroParseErrorTracker(object):
@@ -88,26 +98,41 @@ def chomper_of(x):
 
 # Chomper subclasses
 
+
+class AlternationChomper(AbstractChomper):
+    def __init__(self, chompers, fertile=True, name=None, quiet=False):
+        AbstractChomper.__init__(self, fertile, name, quiet)
+        self._chompers = [chomper_of(x) for x in chompers]
+
+    def chomp(self, s, index, tracker):
+        for chomper in self._chompers:
+            result = chomper.chomp(s, index, tracker)
+            if result is not None:
+                return result
+        return None
+
+
 class CompositionChomper(AbstractChomper):
 
-    def __init__(self, parsers, separator=None, reducer=lambda *x: x):
-        AbstractChomper.__init__(self)
+    def __init__(self, parsers, separator=None, reducer=lambda *x: x,
+                 fertile=True, name=None, quiet=False):
+        AbstractChomper.__init__(self, fertile, name, quiet)
         self._parsers = [chomper_of(x) for x in parsers]
         self._separator = chomper_of(separator)  # may be None
         self._reducer = reducer
 
-    def _chomp(self, s, index, tracker):
+    def chomp(self, s, index, tracker):
         start_index = index
         values = []
         for i, parser in enumerate(self._parsers):
-            chomp_result = parser._chomp(s, index, tracker)
+            chomp_result = parser.chomp(s, index, tracker)
             if chomp_result is None:
                 return None
             value, index = chomp_result
             if parser._fertile:
                 values.append(value)
             if i < len(self._parsers) - 1 and self._separator is not None:
-                chomp_result = self._separator._chomp(s, index, tracker)
+                chomp_result = self._separator.chomp(s, index, tracker)
                 if chomp_result is None:
                     return None
                 _, index = chomp_result
@@ -119,22 +144,23 @@ class DelegateChomper(AbstractChomper):
     """
     Fro parser that delegates parsing to another parser
     """
-    def __init__(self, delegate, fertile, name, quiet=False):
+    def __init__(self, delegate, fertile=True, name=None, quiet=False):
         AbstractChomper.__init__(self, fertile, name, quiet)
         self._delegate = delegate
 
-    def _chomp(self, s, index, tracker):
-        return self._delegate._chomp(s, index, tracker)
+    def chomp(self, s, index, tracker):
+        return self._delegate.chomp(s, index, tracker)
 
 
 class GroupRegexChomper(AbstractChomper):
 
-    def __init__(self, regex_str, func=lambda *x: x):
-        AbstractChomper.__init__(self)
+    def __init__(self, regex_str, func=lambda *x: x, fertile=True, name=None,
+                 quiet=False):
+        AbstractChomper.__init__(self, fertile, name, quiet)
         self._regex = re.compile(regex_str)
         self._func = func
 
-    def _chomp(self, s, index, tracker):
+    def chomp(self, s, index, tracker):
         match = self._regex.match(s, index)
         if match is None:
             self._log_error(tracker, "Expected pattern {}".format(self._regex.pattern), index)
@@ -146,15 +172,16 @@ class GroupRegexChomper(AbstractChomper):
 
 class NestedChomper(AbstractChomper):
 
-    def __init__(self, open_regex_string, close_regex_string):
-        AbstractChomper.__init__(self)
+    def __init__(self, open_regex_string, close_regex_string, fertile=True,
+                 name=None, quiet=False):
+        AbstractChomper.__init__(self, fertile, name, quiet)
         self._init_regex = re.compile(open_regex_string)
         self._open_regex = re.compile(r".*?({})".format(open_regex_string))
         self._close_regex = re.compile(r".*?({})".format(close_regex_string))
         self._open_regex_string = open_regex_string
         self._close_regex_string = close_regex_string
 
-    def _chomp(self, s, index, tracker):
+    def chomp(self, s, index, tracker):
         start_index = index
         init_match = self._init_regex.match(s, index)
         if init_match is None:
@@ -191,33 +218,45 @@ class MapChomper(AbstractChomper):
     """
     Fro parser that performs map operation on parsed values
     """
-    def __init__(self, parser, func):
-        AbstractChomper.__init__(self)
+    def __init__(self, parser, func, fertile=True, name=None, quiet=False):
+        AbstractChomper.__init__(self, fertile, name, quiet)
         self._parser = parser
         self._func = func
 
-    def _chomp(self, s, index, tracker):
-        chomp_result = self._parser._chomp(s, index, tracker)
+    def chomp(self, s, index, tracker):
+        chomp_result = self._parser.chomp(s, index, tracker)
         if chomp_result is None:
             return None
         value, index = chomp_result
         return self._func(value), index
 
 
+class OptionalChomper(AbstractChomper):
+    def __init__(self, child, fertile=True, name=None, quiet=False):
+        AbstractChomper.__init__(self, fertile, name, quiet)
+        self._child = child
+
+    def chomp(self, s, index, tracker):
+        child_result = self._child.chomp(s, index, tracker)
+        if child_result is not None:
+            return child_result
+        return None, index
+
+
 class RegexChomper(AbstractChomper):
 
-    def __init__(self, regex_string, func=lambda x: x):
+    def __init__(self, regex_string, func=lambda x: x, name=None, quiet=False):
         fertile = True
         if regex_string[0:1] == "@":
             fertile = False
             regex_string = regex_string[1:]
         elif regex_string[0:2] == "\\@":
             regex_string = "@"+regex_string[2:]
-        AbstractChomper.__init__(self, fertile)
+        AbstractChomper.__init__(self, fertile, name, quiet)
         self._regex = re.compile(regex_string)
         self._func = func
 
-    def _chomp(self, s, index, tracker):
+    def chomp(self, s, index, tracker):
         match = self._regex.match(s, index)
         if match is None:
             self._log_error(tracker, "Expected pattern {}".format(self._regex.pattern), index)
@@ -235,17 +274,18 @@ class RegexChomper(AbstractChomper):
 
 class SequenceChomper(AbstractChomper):
 
-    def __init__(self, element, separator=None, at_start=False, at_end=False):
-        AbstractChomper.__init__(self)
+    def __init__(self, element, separator=None, at_start=False, at_end=False,
+                 fertile=True, name=None, quiet=False):
+        AbstractChomper.__init__(self, fertile, name, quiet)
         self._element = chomper_of(element)
         self._separator = chomper_of(separator)  # may be None
         self._at_start = at_start and separator is not None
         self._at_end = at_end and separator is not None
 
-    def _chomp(self, s, index, tracker):
+    def chomp(self, s, index, tracker):
         rollback_index = index
         if self._at_start:
-            chomp_result = self._separator._chomp(s, index, tracker)
+            chomp_result = self._separator.chomp(s, index, tracker)
             if chomp_result is None:
                 return None if self._at_end else [], rollback_index
             _, index = chomp_result
@@ -253,7 +293,7 @@ class SequenceChomper(AbstractChomper):
         encountered_values = []
         pending_value = None
         while True:
-            chomp_result = self._element._chomp(s, index, tracker)
+            chomp_result = self._element.chomp(s, index, tracker)
             if chomp_result is None:
                 return encountered_values, rollback_index
             value, index = chomp_result
@@ -264,7 +304,7 @@ class SequenceChomper(AbstractChomper):
                 encountered_values.append(value)
 
             if self._separator is not None:
-                chomp_result = self._separator._chomp(s, index, tracker)
+                chomp_result = self._separator.chomp(s, index, tracker)
                 if chomp_result is None:
                     return encountered_values, rollback_index
                 _, index = chomp_result

@@ -9,6 +9,19 @@ import fro_parse_error
 
 class FroTests(unittest.TestCase):
 
+    def test_alt1(self):
+        parser = fro.alt([r"abc+", r"ab+c"])
+        self.assertEquals(parser.parse("abcc"), "abcc")
+        self.assertEquals(parser.parse("abbbc"), "abbbc")
+        self.assertRaises(fro_parse_error.FroParseError, parser.parse, "ac")
+
+    def test_alt2(self):
+        parser = fro.alt([r"[0-9]{3}", fro.intp]).quiet()
+        self.assertEquals(parser.parse("12"), 12)
+        self.assertEquals(parser.parse("358"), "358")
+        self.assertEquals(parser.parse("9876"), None)
+        self.assertEquals(parser.parse("234t"), None)
+
     def test_compose1(self):
         rgxs = [fro.rgx(str(x), int) for x in xrange(100)]
         rgxs = [++rgx if i % 2 == 0 else --rgx for i, rgx in enumerate(rgxs)]
@@ -38,6 +51,20 @@ class FroTests(unittest.TestCase):
     def test_group_rgx3(self):
         parser = fro.group_rgx("(a)(b)")
         self.assertRaises(fro_parse_error.FroParseError, parser.parse, "acdf")
+
+    def test_maybe1(self):
+        maybep = fro.rgx(r"ab").maybe()
+        parser = fro.compose([-maybep, fro.intp]) >> (lambda x: x)
+        for n in xrange(10):
+            self.assertEquals(parser.parse(str(n)), n)
+            self.assertEquals(parser.parse("ab{}".format(n)), n)
+
+    def test_maybe2(self):
+        letters = "abcdefghijklmnop"
+        for _ in xrange(10):
+            parsers = [fro.rgx(c).maybe() for c in letters]
+            s = "".join(c for c in letters if random.random() < 0.5)
+            fro.compose(parsers).parse(s)  # should not fail
 
     def test_nested1(self):
         inside = "(())()(())()"
