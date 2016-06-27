@@ -4,7 +4,7 @@ import random
 import unittest
 
 import fro
-import fro_parser
+import fro_parse_error
 
 
 class FroTests(unittest.TestCase):
@@ -20,12 +20,12 @@ class FroTests(unittest.TestCase):
     def test_compose2(self):
         rgxs = [r"a+b+", r"b+a+"]
         parser = fro.compose(rgxs)
-        self.assertRaises(fro_parser.FroParseError, parser.parse, "aaabbaa")
+        self.assertRaises(fro_parse_error.FroParseError, parser.parse, "aaabbaa")
 
     def test_compose3(self):
         rgxs = [r"ab*", "b+"]
         parser = fro.compose(rgxs)
-        self.assertRaises(fro_parser.FroParseError, parser.parse, "abbb")
+        self.assertRaises(fro_parse_error.FroParseError, parser.parse, "abbb")
 
     def test_group_rgx1(self):
         parser = fro.group_rgx(r"(a)(b+).*")
@@ -37,7 +37,7 @@ class FroTests(unittest.TestCase):
 
     def test_group_rgx3(self):
         parser = fro.group_rgx("(a)(b)")
-        self.assertRaises(fro_parser.FroParseError, parser.parse, "acdf")
+        self.assertRaises(fro_parse_error.FroParseError, parser.parse, "acdf")
 
     def test_nested1(self):
         inside = "(())()(())()"
@@ -66,7 +66,7 @@ class FroTests(unittest.TestCase):
     def test_nested4(self):
         s = "(()"
         nested_parser = fro.nested(r"\(", r"\)")
-        self.assertRaises(fro_parser.FroParseError, nested_parser.parse, s)
+        self.assertRaises(fro_parse_error.FroParseError, nested_parser.parse, s)
 
     def test_seq1(self):
         num = fro.rgx(r"[0-9]+", int)

@@ -1,31 +1,36 @@
-from composition_parser import CompositionFroParser
-from group_regex_fro_parser import GroupRegexFroParser
-from nested_parser import NestedFroParser
-from regex_parser import RegexFroParser
-from sequence_parser import SequenceFroParser
+from fro_chomper import CompositionChomper, GroupRegexChomper, NestedChomper,\
+    RegexChomper, SequenceChomper
 
-# --------------------------------------------------------------------
+
+import fro_parse_error
+from fro_parser import FroParser
+
+
 # public interface
+
+FroParseError = fro_parse_error.FroParseError
 
 
 def compose(parsers, sep=None, reducer=lambda *x: x):
-    return CompositionFroParser(parsers, sep, reducer)
+    chompers = [_extract(parser) for parser in parsers]
+    return FroParser(CompositionChomper(chompers, sep, reducer))
 
 
 def group_rgx(regex_string, reducer=lambda *x: x):
-    return GroupRegexFroParser(regex_string, reducer)
+    return FroParser(GroupRegexChomper(regex_string, reducer))
 
 
 def nested(open_regex_string, close_regex_string):
-    return NestedFroParser(open_regex_string, close_regex_string)
+    return FroParser(NestedChomper(open_regex_string, close_regex_string))
 
 
 def rgx(regex_string, func=lambda x: x):
-    return RegexFroParser(regex_string, func)
+    return FroParser(RegexChomper(regex_string, func))
 
 
 def seq(value, sep=None, sep_at_start=False, sep_at_end=False):
-    return SequenceFroParser(value, sep, sep_at_start, sep_at_end)
+    return FroParser(SequenceChomper(_extract(value), _extract(sep),
+                                     sep_at_start, sep_at_end))
 
 
 boolp = rgx(r"True|False", bool)
@@ -62,6 +67,7 @@ def offset_of_index(line, index):
 # --------------------------------------------------------------------
 # internals
 
-
-
-
+def _extract(value):
+    if isinstance(value, FroParser):
+        return value._chomper
+    return value
