@@ -26,7 +26,8 @@ class NestedFroParser(AbstractFroParser):
             if open_match is None and close_match is None:
                 msg = "No closing {} to match opening {}"\
                     .format(self._open_regex_string, self._close_regex_string)
-                self._log_error(logger, msg, start_index, len(s))
+                end_index = re.compile(r".*").match(s, index).end()
+                self._log_error(logger, msg, start_index, end_index)
                 return None
             elif open_match is None:
                 match = close_match

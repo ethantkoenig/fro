@@ -1,12 +1,13 @@
 import fro_parser
 import fro_parser_utils
 
+
 class SequenceFroParser(fro_parser.AbstractFroParser):
 
     def __init__(self, element, separator=None, at_start=False, at_end=False):
         fro_parser.AbstractFroParser.__init__(self)
         self._element = fro_parser_utils.parser_of(element)
-        self._separator = fro_parser_utils.parser_of(separator) # may be None
+        self._separator = fro_parser_utils.parser_of(separator)  # may be None
         self._at_start = at_start and separator is not None
         self._at_end = at_end and separator is not None
 
@@ -40,5 +41,3 @@ class SequenceFroParser(fro_parser.AbstractFroParser):
                     rollback_index = index
                     encountered_values.append(pending_value)
                     pending_value = None
-
-

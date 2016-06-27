@@ -1,3 +1,4 @@
+# coding=utf-8
 import math
 import random
 import unittest
@@ -111,8 +112,15 @@ class FroTests(unittest.TestCase):
             n = random.getrandbits(100)
             self.assertEqual(fro.intp.parse(str(n)), n)
 
-
-
+    def test_offset_of_index1(self):
+        s = "αβρααμ εγεννησεν τον"
+        u = s.decode(encoding="utf-8")
+        for i in xrange(len(u)):
+            low_index = len(u[:i].encode(encoding="utf-8"))
+            high_index = len(u[:(i + 1)].encode(encoding="utf-8"))
+            for index in xrange(low_index, high_index):
+                self.assertEqual(fro.offset_of_index(s, index), i)
+        self.assertEqual(fro.offset_of_index(s, len(s)), len(u))
 
 
 # utilities
@@ -120,8 +128,6 @@ class FroTests(unittest.TestCase):
 def random_float():
     abs_val = math.exp(random.uniform(-200, 200))
     return abs_val if random.random() < 0.5 else -abs_val
-
-
 
 
 if __name__ == "__main__":

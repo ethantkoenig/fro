@@ -26,7 +26,7 @@ class RegexFroParser(fro_parser.AbstractFroParser):
         if end_index < len(s):
             self._log_error(logger, "Unexpected character", end_index)
         elif end_index > len(s):
-            raise AssertionError("invalid index")
+            raise AssertionError("Invalid index")
         matched = s[start_index:end_index]
         value = fro_parser.AbstractFroParser._apply(start_index, end_index, self._func, matched)
         return value, end_index

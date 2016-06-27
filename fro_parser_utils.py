@@ -5,6 +5,7 @@ Various utility functions for fro parsers
 import fro_parser
 import regex_parser
 
+
 def parser_of(x):
     """
     :param x: value representing a fro parser

@@ -168,10 +168,10 @@ class MapFroParser(AbstractFroParser):
         self._parser = parser
         self._func = func
 
-    def _chomp(self, s, index, fail_hard):
-        chomp_result = self._parser._chomp(s, index, fail_hard)
+    def _chomp(self, s, index, logger):
+        chomp_result = self._parser._chomp(s, index, logger)
         if chomp_result is None:
-            return self._quit(index, fail_hard)
+            return None
         value, index = chomp_result
         return self._func(value), index
 
@@ -184,5 +184,5 @@ class DelegateFroParser(AbstractFroParser):
         AbstractFroParser.__init__(self, fertile, name)
         self._delegate = delegate
 
-    def _chomp(self, s, index, fail_hard):
-        return self._delegate._chomp(s, index, fail_hard)
+    def _chomp(self, s, index, logger):
+        return self._delegate._chomp(s, index, logger)

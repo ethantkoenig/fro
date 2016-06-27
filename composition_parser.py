@@ -1,12 +1,13 @@
 import fro_parser
 import fro_parser_utils
 
+
 class CompositionFroParser(fro_parser.AbstractFroParser):
 
     def __init__(self, parsers, separator=None, reducer=lambda *x: x):
         fro_parser.AbstractFroParser.__init__(self)
         self._parsers = [fro_parser_utils.parser_of(x) for x in parsers]
-        self._separator = fro_parser_utils.parser_of(separator) # may be None
+        self._separator = fro_parser_utils.parser_of(separator)  # may be None
         self._reducer = reducer
 
     def _chomp(self, s, index, logger):
