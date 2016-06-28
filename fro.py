@@ -11,9 +11,9 @@ from fro_parser import FroParser
 FroParseError = fro_parse_error.FroParseError
 
 
-def alt(parsers):
+def alt(parsers, name=None): # TODO add name to rest
     chompers = [_extract(parser) for parser in parsers]
-    return FroParser(AlternationChomper(chompers))
+    return FroParser(AlternationChomper(chompers, name=name))
 
 def compose(parsers, sep=None, reducer=lambda *x: x):
     chompers = [_extract(parser) for parser in parsers]

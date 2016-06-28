@@ -1,3 +1,4 @@
+import copy
 import re
 
 import fro_parse_error
@@ -29,6 +30,16 @@ class AbstractChomper(object):
 
     def quiet(self):
         return self._quiet
+
+    def clone(self, fertile=None, name=None, quiet=None):
+        fertile = fertile if fertile is not None else self._fertile
+        name = name if name is not None else self._name
+        quiet = quiet if quiet is not None else self._quiet
+        carbon = copy.copy(self)
+        carbon._fertile = fertile
+        carbon._name = name
+        carbon._quiet = quiet
+        return carbon
 
     def chomp(self, s, index, tracker):
         """
@@ -67,9 +78,7 @@ class AbstractChomper(object):
         tracker.report_error(fro_parse_error.FroParseError(msg, start_index, end_index))
 
 
-
 class FroParseErrorTracker(object):
-
     def __init__(self):
         self._error = None
 
@@ -186,7 +195,7 @@ class NestedChomper(AbstractChomper):
         init_match = self._init_regex.match(s, index)
         if init_match is None:
             return None
-        start_inside_index = index = init_match.end()
+        start_inside_index = index = end_index = init_match.end()
         nesting_level = 1
         while nesting_level > 0:
             open_match = self._open_regex.match(s, index)
@@ -312,4 +321,3 @@ class SequenceChomper(AbstractChomper):
                     rollback_index = index
                     encountered_values.append(pending_value)
                     pending_value = None
-

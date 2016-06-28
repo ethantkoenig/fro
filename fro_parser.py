@@ -1,5 +1,3 @@
-import copy
-
 import fro_chomper
 
 
@@ -39,9 +37,7 @@ class FroParser(object):
         :param name: name for parser
         :return: a copy of the called parser, with set error message
         """
-        carbon = copy.copy(self._chomper)
-        carbon._name = name
-        return FroParser(carbon)
+        return FroParser(self._chomper.clone(name=name))
 
     def maybe(self):
         return FroParser(fro_chomper.OptionalChomper(
@@ -51,9 +47,7 @@ class FroParser(object):
             quiet=self._chomper.quiet()))
 
     def quiet(self):
-        carbon = copy.copy(self._chomper)
-        carbon._quiet = True
-        return FroParser(carbon)
+        return FroParser(self._chomper.clone(quiet=True))
 
     def lstrip(self):
         if self._chomper.fertile():
@@ -103,7 +97,17 @@ class FroParser(object):
             quiet=self._chomper.quiet()))
 
     def __or__(self, func):
-        return FroParser(fro_chomper.MapChomper(self._chomper, func))
+        return FroParser(fro_chomper.MapChomper(
+            self._chomper,
+            func,
+            fertile=self._chomper.fertile(),
+            name=self._chomper.name(),
+            quiet=self._chomper.quiet()))
 
     def __rshift__(self, func):
-        return FroParser(fro_chomper.MapChomper(self._chomper, lambda x: func(*x)))
+        return FroParser(fro_chomper.MapChomper(
+            self._chomper,
+            lambda x: func(*x),
+            fertile=self._chomper.fertile(),
+            name=self._chomper.name(),
+            quiet=self._chomper.quiet()))

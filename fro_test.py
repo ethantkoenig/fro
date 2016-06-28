@@ -23,9 +23,9 @@ class FroTests(unittest.TestCase):
         self.assertEquals(parser.parse("234t"), None)
 
     def test_compose1(self):
-        rgxs = [fro.rgx(str(x), int) for x in xrange(100)]
+        rgxs = [fro.rgx(str(n), int) for n in xrange(100)]
         rgxs = [++rgx if i % 2 == 0 else --rgx for i, rgx in enumerate(rgxs)]
-        parser = fro.compose(rgxs, reducer=lambda *x: sum(x))
+        parser = fro.compose(rgxs) | sum
         actual = parser.parse("".join(str(i) for i in xrange(100)))
         expected = sum(i for i in xrange(100) if i % 2 == 0)
         self.assertEqual(actual, expected)
@@ -64,7 +64,8 @@ class FroTests(unittest.TestCase):
         for _ in xrange(10):
             parsers = [fro.rgx(c).maybe() for c in letters]
             s = "".join(c for c in letters if random.random() < 0.5)
-            fro.compose(parsers).parse(s)  # should not fail
+            parser = fro.compose(parsers) | (lambda *x: 0)
+            self.assertEqual(parser.parse(s), 0)  # parse should not fail
 
     def test_nested1(self):
         inside = "(())()(())()"
