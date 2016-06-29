@@ -1,4 +1,4 @@
-import fro_chomper
+import chompers
 
 
 class FroParser(object):
@@ -16,17 +16,17 @@ class FroParser(object):
         :param s: string to parse
         :return: value parsed, or None if parse failed (and no exception was thrown)
         """
-        logger = fro_chomper.FroParseErrorTracker()
-        chomp_result = self._chomper.chomp(s, 0, logger)
+        tracker = chompers.FroParseErrorTracker()
+        chomp_result = self._chomper.chomp(s, 0, tracker)
         if chomp_result is None:
             if self._chomper.quiet():
                 return None
-            raise logger.retrieve_error()
+            raise tracker.retrieve_error()
         value, index = chomp_result
         if index < len(s):
             if self._chomper.quiet():
                 return None
-            raise logger.retrieve_error()
+            raise tracker.retrieve_error()
         elif index > len(s):
             raise AssertionError("Invalid index")  # should never happen
         return value
@@ -39,9 +39,10 @@ class FroParser(object):
         """
         return FroParser(self._chomper.clone(name=name))
 
-    def maybe(self):
-        return FroParser(fro_chomper.OptionalChomper(
+    def maybe(self, default=None):
+        return FroParser(chompers.OptionalChomper(
             self._chomper,
+            default=default,
             fertile=self._chomper.fertile(),
             name=self._chomper.name(),
             quiet=self._chomper.quiet()))
@@ -51,26 +52,27 @@ class FroParser(object):
 
     def lstrip(self):
         if self._chomper.fertile():
-            return FroParser(fro_chomper.CompositionChomper(
-                [r"@\s*", self._chomper],
-                reducer=lambda x: x,
+            return FroParser(chompers.CompositionChomper(
+                [chompers.RegexChomper(r"\s*", fertile=False), self._chomper],
                 fertile=False,
                 name=self._chomper.name(),
-                quiet=self._chomper.quiet()))
+                quiet=self._chomper.quiet())).get()
         return -(+self).lstrip()
 
     def rstrip(self):
         if self._chomper.fertile():
-            return FroParser(fro_chomper.CompositionChomper(
-                [self._chomper, r"@\s*"],
-                reducer=lambda x: x,
+            return FroParser(chompers.CompositionChomper(
+                [self._chomper, chompers.RegexChomper(r"\s*", fertile=False)],
                 fertile=True,
                 name=self._chomper.name(),
-                quiet=self._chomper.quiet()))
+                quiet=self._chomper.quiet())).get()
         return -(+self).rstrip()
 
     def strip(self):
         return self.lstrip().rstrip()
+
+    def get(self):
+        return self >> (lambda x: x)
 
     def __neg__(self):
         """
@@ -78,7 +80,7 @@ class FroParser(object):
         """
         if not self._chomper.fertile():
             return self
-        return FroParser(fro_chomper.DelegateChomper(
+        return FroParser(chompers.DelegateChomper(
             self._chomper,
             fertile=False,
             name=self._chomper.name(),
@@ -90,14 +92,14 @@ class FroParser(object):
         """
         if self._chomper.fertile():
             return self
-        return FroParser(fro_chomper.DelegateChomper(
+        return FroParser(chompers.DelegateChomper(
             self._chomper,
             fertile=True,
             name=self._chomper.name(),
             quiet=self._chomper.quiet()))
 
     def __or__(self, func):
-        return FroParser(fro_chomper.MapChomper(
+        return FroParser(chompers.MapChomper(
             self._chomper,
             func,
             fertile=self._chomper.fertile(),
@@ -105,7 +107,7 @@ class FroParser(object):
             quiet=self._chomper.quiet()))
 
     def __rshift__(self, func):
-        return FroParser(fro_chomper.MapChomper(
+        return FroParser(chompers.MapChomper(
             self._chomper,
             lambda x: func(*x),
             fertile=self._chomper.fertile(),

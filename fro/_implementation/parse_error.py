@@ -1,7 +1,7 @@
 
 class FroParseError(Exception):
     """
-    An exception on parsing failures
+    An exception for parsing failures
     """
     def __init__(self, message, start_index, end_index=None, cause=None):
         """
