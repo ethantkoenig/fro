@@ -49,26 +49,6 @@ intp = rgx(r"-?[0-9]+") | int
 nonneg_intp = rgx(r"[0-9]+") | int
 pos_intp = rgx(r"0*[1-9][0-9]*") | int
 
-
-def offset_of_index(line, index):
-    uc_line = line.decode("utf-8")
-    lo = 0
-    hi = len(uc_line)
-    while hi - lo > 1:
-        mid = (lo + hi) / 2
-        uc_subline = uc_line[:mid]
-        num_bytes = len(uc_subline.encode("utf-8"))
-        if num_bytes == index:
-            return mid
-        elif num_bytes < index:
-            lo = mid
-        else:
-            hi = mid
-    if lo == len(uc_line) - 1 and index >= len(line):
-        return lo + 1
-    return lo
-
-
 # --------------------------------------------------------------------
 # internals
 

@@ -1,5 +1,5 @@
 
-class FroParseError(StandardError):
+class FroParseError(Exception):
     """
     An exception on parsing failures
     """
