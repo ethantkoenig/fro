@@ -23,7 +23,7 @@ class FroTests(unittest.TestCase):
         self.assertEquals(parser.parse("234t"), None)
 
     def test_compose1(self):
-        rgxs = [fro.rgx(str(n), int) for n in xrange(100)]
+        rgxs = [fro.rgx(str(n)) | int for n in xrange(100)]
         rgxs = [++rgx if i % 2 == 0 else --rgx for i, rgx in enumerate(rgxs)]
         parser = fro.compose(rgxs) | sum
         actual = parser.parse("".join(str(i) for i in xrange(100)))
@@ -97,7 +97,7 @@ class FroTests(unittest.TestCase):
         self.assertRaises(fro_parse_error.FroParseError, nested_parser.parse, s)
 
     def test_seq1(self):
-        num = fro.rgx(r"[0-9]+", int)
+        num = fro.rgx(r"[0-9]+") | int
         num_seq = fro.seq(num, ",").quiet()
         for n in xrange(10):
             actual = num_seq.parse(",".join(str(x) for x in range(n)))

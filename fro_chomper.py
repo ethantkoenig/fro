@@ -123,15 +123,12 @@ class AlternationChomper(AbstractChomper):
 
 class CompositionChomper(AbstractChomper):
 
-    def __init__(self, parsers, separator=None, reducer=lambda *x: x,
-                 fertile=True, name=None, quiet=False):
+    def __init__(self, parsers, separator=None, fertile=True, name=None, quiet=False):
         AbstractChomper.__init__(self, fertile, name, quiet)
         self._parsers = [chomper_of(x) for x in parsers]
         self._separator = chomper_of(separator)  # may be None
-        self._reducer = reducer
 
     def chomp(self, s, index, tracker):
-        start_index = index
         values = []
         for i, parser in enumerate(self._parsers):
             chomp_result = parser.chomp(s, index, tracker)
@@ -145,8 +142,7 @@ class CompositionChomper(AbstractChomper):
                 if chomp_result is None:
                     return None
                 _, index = chomp_result
-        value = AbstractChomper._apply(start_index, index, self._reducer, *values)
-        return value, index
+        return tuple(values), index
 
 
 class DelegateChomper(AbstractChomper):
@@ -163,11 +159,9 @@ class DelegateChomper(AbstractChomper):
 
 class GroupRegexChomper(AbstractChomper):
 
-    def __init__(self, regex_str, func=lambda *x: x, fertile=True, name=None,
-                 quiet=False):
+    def __init__(self, regex_str, fertile=True, name=None, quiet=False):
         AbstractChomper.__init__(self, fertile, name, quiet)
         self._regex = re.compile(regex_str)
-        self._func = func
 
     def chomp(self, s, index, tracker):
         match = self._regex.match(s, index)
@@ -175,8 +169,7 @@ class GroupRegexChomper(AbstractChomper):
             self._log_error(tracker, "Expected pattern {}".format(self._regex.pattern), index)
             return None
         end_index = match.end()
-        value = AbstractChomper._apply(index, end_index, self._func, *match.groups())
-        return value, end_index
+        return match.groups(), end_index
 
 
 class NestedChomper(AbstractChomper):
@@ -233,11 +226,12 @@ class MapChomper(AbstractChomper):
         self._func = func
 
     def chomp(self, s, index, tracker):
+        start_index = index
         chomp_result = self._parser.chomp(s, index, tracker)
         if chomp_result is None:
             return None
         value, index = chomp_result
-        return self._func(value), index
+        return AbstractChomper._apply(start_index, index, self._func, value), index
 
 
 class OptionalChomper(AbstractChomper):
@@ -254,7 +248,7 @@ class OptionalChomper(AbstractChomper):
 
 class RegexChomper(AbstractChomper):
 
-    def __init__(self, regex_string, func=lambda x: x, name=None, quiet=False):
+    def __init__(self, regex_string, name=None, quiet=False):
         fertile = True
         if regex_string[0:1] == "@":
             fertile = False
@@ -263,7 +257,6 @@ class RegexChomper(AbstractChomper):
             regex_string = "@"+regex_string[2:]
         AbstractChomper.__init__(self, fertile, name, quiet)
         self._regex = re.compile(regex_string)
-        self._func = func
 
     def chomp(self, s, index, tracker):
         match = self._regex.match(s, index)
@@ -276,9 +269,7 @@ class RegexChomper(AbstractChomper):
             self._log_error(tracker, "Unexpected character", end_index)
         elif end_index > len(s):
             raise AssertionError("Invalid index")
-        matched = s[start_index:end_index]
-        value = AbstractChomper._apply(start_index, end_index, self._func, matched)
-        return value, end_index
+        return s[start_index:end_index], end_index
 
 
 class SequenceChomper(AbstractChomper):
