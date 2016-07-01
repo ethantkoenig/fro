@@ -5,7 +5,7 @@ from os import path
 here = path.abspath(path.dirname(__file__))
 
 
-with open(path.join(here, "README"), "r") as f:
+with open(path.join(here, "README.rst"), "r") as f:
     long_description = f.read()
 
 setup(
