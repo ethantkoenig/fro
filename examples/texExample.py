@@ -27,9 +27,14 @@ class TexDocument(object):
     def __str__(self):
         return " ".join(str(e) for e in self.elements)
 
+# parser for TexText objects
 textp = fro.rgx(r"[^\\\s]+", name="TeX text") | TexText
+
+# parser for TexCommand objects
 cmdbasep = fro.group_rgx(r"\\([^\{\s]+)").get()
 cmdcontentp = fro.group_rgx(r"\{([^\}]*?)\}").get().maybe()
 commandp = fro.comp([cmdbasep, cmdcontentp], name="TeX command") >> TexCommand
+
+# parser for TexDocument objects
 elementp = fro.alt([commandp, textp])
 documentp = fro.seq(elementp, sep=r" ", name="Tex document") | TexDocument
