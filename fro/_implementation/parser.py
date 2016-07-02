@@ -1,4 +1,4 @@
-import chompers
+from fro._implementation import chompers
 
 
 class FroParser(object):
@@ -16,7 +16,7 @@ class FroParser(object):
         :param s: string to parse
         :return: value parsed, or None if parse failed (and no exception was thrown)
         """
-        tracker = chompers.FroParseErrorTracker()
+        tracker = chompers.FroParseErrorTracker(s)
         chomp_result = self._chomper.chomp(s, 0, tracker)
         if chomp_result is None:
             if self._chomper.quiet():

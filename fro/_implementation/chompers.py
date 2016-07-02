@@ -1,7 +1,7 @@
 import copy
 import re
 
-import parse_error
+from fro._implementation import parse_error
 
 
 class AbstractChomper(object):
@@ -54,19 +54,21 @@ class AbstractChomper(object):
 
     # internals
     @staticmethod
-    def _apply(start_index, end_index, func, *args):
+    def _apply(tracker, start_index, end_index, func, *args):
         """
         Convenience method to apply function while gracefully handling errors
+        :param tracker: FroParseErrorTracker
         :param start_index: start index of relevant region
         :param end_index: end index of relevant region
         :param func: function
         :param args: arguments
         :return: result of function application
         """
+        assert isinstance(tracker, FroParseErrorTracker) # TODO
         try:
             return func(*args)
         except StandardError as e:
-            raise parse_error.FroParseError(str(e), start_index, end_index, e)
+            tracker.urgent_error(str(e), start_index, end_index, e)
 
     def _log_error(self, tracker, base_msg, start_index, end_index=None):
         """
@@ -74,7 +76,7 @@ class AbstractChomper(object):
         """
         end_index = start_index + 1 if end_index is None else end_index
         msg = base_msg if self._name is None else "{} when parsing {}".format(base_msg, self._name)
-        tracker.report_error(parse_error.FroParseError(msg, start_index, end_index))
+        tracker.report_error(msg, start_index, end_index)
 
 
 class FroParseErrorTracker(object):
@@ -82,15 +84,20 @@ class FroParseErrorTracker(object):
     Tracks the errors that have been encountered during parsing, and preserves the most relevant one
     (i.e. occurred at farthest index)
     """
-    def __init__(self):
+    def __init__(self, string):
         self._error = None
+        self._string = string
 
-    def report_error(self, error):
+    def report_error(self, message, start_index, end_index, cause=None):
+        error = parse_error.FroParseError(self._string, message, start_index, end_index, cause)
         if self._error is None or error.end_index() >= self._error.end_index():
             self._error = error
 
     def retrieve_error(self):
         return self._error
+
+    def urgent_error(self, message, start_index, end_index, cause=None):
+        raise parse_error.FroParseError(self._string, message, start_index, end_index, cause)
 
 
 # Chomper subclasses
@@ -219,11 +226,11 @@ class MapChomper(AbstractChomper):
         if chomp_result is None:
             return None
         value, index = chomp_result
-        return AbstractChomper._apply(start_index, index, self._func, value), index
+        return AbstractChomper._apply(tracker, start_index, index, self._func, value), index
 
 
 class OptionalChomper(AbstractChomper):
-    def __init__(self, child, default=None,fertile=True, name=None, quiet=False):
+    def __init__(self, child, default=None, fertile=True, name=None, quiet=False):
         AbstractChomper.__init__(self, fertile, name, quiet)
         self._child = child
         self._default = default
