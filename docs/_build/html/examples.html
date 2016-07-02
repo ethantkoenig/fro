@@ -1,0 +1,258 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Examples &mdash; Fro 1.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Fro 1.0.0 documentation" href="index.html"/>
+        <link rel="prev" title="Fro Interface" href="api.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Fro
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction to Fro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Parser Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Fro Interface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-1-email-addresses">Example 1: Email Addresses</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Fro</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Examples</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/examples.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="examples">
+<h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="example-1-email-addresses">
+<h2>Example 1: Email Addresses<a class="headerlink" href="#example-1-email-addresses" title="Permalink to this headline">¶</a></h2>
+<p>Suppose you are given a text file where each line is of the form:</p>
+<blockquote>
+<div>&lt;first name&gt; &lt;last name&gt; : &lt;email address&gt;</div></blockquote>
+<p>Unfortunately for you, the file is rather sloppy; sometimes there is no whitespace between the last name and the colon,
+other times there are multiple spaces. There are some blank lines, and there are some lines with multiple entries. You
+need generate an <code class="docutils literal"><span class="pre">EmailDirectory</span></code> object from this file:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">EmailAddress</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_name</span><span class="p">,</span> <span class="n">domain</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">local_name</span> <span class="o">=</span> <span class="n">local_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain</span> <span class="o">=</span> <span class="n">domain</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{loc}</span><span class="s2">@</span><span class="si">{dom}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">local_name</span><span class="p">,</span> <span class="n">dom</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">domain</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Name</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">last</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first</span> <span class="o">=</span> <span class="n">first</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last</span> <span class="o">=</span> <span class="n">last</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{f}</span><span class="s2"> </span><span class="si">{l}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">first</span><span class="p">,</span> <span class="n">l</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">last</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">EmailDirectory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entries</span><span class="p">):</span>  <span class="c1"># entries: (Name, EmailAddress) iterator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span> <span class="c1"># dict from Name to EmailAddress</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">entry_strings</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{n}</span><span class="s2"> : </span><span class="si">{a}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">addr</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">addr</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">entry_strings</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using fro, you can write code for parsing the text file in under ten lines:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># email address ::= &lt;local name&gt;@&lt;domain&gt;, where &lt;domain&gt; is &lt;something&gt;.&lt;something&gt;</span>
+<span class="n">emailaddrp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="s2">r&quot;[\w]+&quot;</span><span class="p">,</span> <span class="s2">r&quot;~@&quot;</span><span class="p">,</span> <span class="s2">r&quot;[\w]+\.[\w]+&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;email address&quot;</span><span class="p">)</span>\
+                 <span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">&gt;&gt;</span> <span class="n">EmailAddress</span>
+<span class="n">firstnamep</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[\w]+&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;first name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="n">lastnamep</span> <span class="o">=</span> <span class="n">firstnamep</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;last name&quot;</span><span class="p">)</span>
+<span class="n">namep</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">firstnamep</span><span class="p">,</span> <span class="n">lastnamep</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;full name&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">Name</span>
+<span class="c1"># entry ::= &lt;full name&gt; : &lt;email address&gt;</span>
+<span class="n">entryp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">namep</span><span class="p">,</span> <span class="s2">r&quot;~:&quot;</span><span class="p">,</span> <span class="n">emailaddrp</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;directory entry&quot;</span><span class="p">)</span>
+<span class="n">emaildirp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">seq</span><span class="p">(</span><span class="n">entryp</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">EmailDirectory</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">emaildirp</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Not only will this code exhibit the desired behavior, it will raise informative error messages when it encounters
+misformatted input.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="api.html" class="btn btn-neutral" title="Fro Interface" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ethan Koenig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

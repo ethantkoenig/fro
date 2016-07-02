@@ -39,13 +39,13 @@ def _parse_rgx(regex_string):
 # public interface
 
 
-def alt(parsers, name=None):
-    chompers_ = [_extract(p) for p in parsers]
+def alt(parser_values, name=None):
+    chompers_ = [_extract(p) for p in parser_values]
     return parser.FroParser(chompers.AlternationChomper(chompers_, name=name))
 
 
-def comp(parsers, sep=None, name=None):
-    chompers_ = [_extract(p) for p in parsers]
+def comp(parser_values, sep=None, name=None):
+    chompers_ = [_extract(p) for p in parser_values]
     return parser.FroParser(chompers.CompositionChomper(chompers_, sep, name=name))
 
 
@@ -66,8 +66,8 @@ def rgx(regex_string, name=None):
         rgx_str, fertile=fertile, name=name))
 
 
-def seq(value, sep=None, sep_at_start=False, sep_at_end=False, name=None):
-    return parser.FroParser(chompers.SequenceChomper(_extract(value), _extract(sep),
+def seq(parser_value, sep=None, sep_at_start=False, sep_at_end=False, name=None):
+    return parser.FroParser(chompers.SequenceChomper(_extract(parser_value), _extract(sep),
                                                      sep_at_start, sep_at_end, name=name))
 
 # nothing before decimal or something before decimal

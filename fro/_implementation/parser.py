@@ -10,29 +10,29 @@ class FroParser(object):
 
     # public interface
 
-    def parse(self, s):
+    def parse(self, string_to_parse):
         """
         Parses the string into an object
-        :param s: string to parse
+        :param string_to_parse: string to parse
         :return: value parsed, or None if parse failed (and no exception was thrown)
         """
-        tracker = chompers.FroParseErrorTracker(s)
-        chomp_result = self._chomper.chomp(s, 0, tracker)
+        tracker = chompers.FroParseErrorTracker(string_to_parse)
+        chomp_result = self._chomper.chomp(string_to_parse, 0, tracker)
         if chomp_result is None:
             if self._chomper.quiet():
                 return None
             raise tracker.retrieve_error()
         value, index = chomp_result
-        if index < len(s):
+        if index < len(string_to_parse):
             if self._chomper.quiet():
                 return None
             error = tracker.retrieve_error()
             if error is not None:
                 raise error
-            msg = "Unexpected character {}".format(s[index:index+1])
+            msg = "Unexpected character {}".format(string_to_parse[index:index+1])
             msg_obj = parse_error.FroParseError.Message(msg)
-            raise parse_error.FroParseError(s, [msg_obj], index, index + 1)
-        elif index > len(s):
+            raise parse_error.FroParseError(string_to_parse, [msg_obj], index, index + 1)
+        elif index > len(string_to_parse):
             raise AssertionError("Invalid index")  # should never happen
         return value
 
