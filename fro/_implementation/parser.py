@@ -54,10 +54,10 @@ class FroParser(object):
         if self._chomper.fertile():
             return FroParser(chompers.CompositionChomper(
                 [chompers.RegexChomper(r"\s*", fertile=False), self._chomper],
-                fertile=False,
+                fertile=True,
                 name=self._chomper.name(),
                 quiet=self._chomper.quiet())).get()
-        return -(+self).lstrip()
+        return -((+self).lstrip())
 
     def rstrip(self):
         if self._chomper.fertile():
@@ -66,7 +66,7 @@ class FroParser(object):
                 fertile=True,
                 name=self._chomper.name(),
                 quiet=self._chomper.quiet())).get()
-        return -(+self).rstrip()
+        return -((+self).rstrip())
 
     def strip(self):
         return self.lstrip().rstrip()

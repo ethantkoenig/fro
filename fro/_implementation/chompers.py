@@ -56,7 +56,7 @@ class AbstractChomper(object):
     @staticmethod
     def _apply(start_index, end_index, func, *args):
         """
-        Convenience match to apply function while gracefully handling errors
+        Convenience method to apply function while gracefully handling errors
         :param start_index: start index of relevant region
         :param end_index: end index of relevant region
         :param func: function
@@ -71,7 +71,6 @@ class AbstractChomper(object):
     def _log_error(self, tracker, base_msg, start_index, end_index=None):
         """
         Convenience method to add a parse error to the tracker
-        :return:
         """
         end_index = start_index + 1 if end_index is None else end_index
         msg = base_msg if self._name is None else "{} when parsing {}".format(base_msg, self._name)
@@ -79,6 +78,10 @@ class AbstractChomper(object):
 
 
 class FroParseErrorTracker(object):
+    """
+    Tracks the errors that have been encountered during parsing, and preserves the most relevant one
+    (i.e. occurred at farthest index)
+    """
     def __init__(self):
         self._error = None
 

@@ -167,6 +167,7 @@ class FroTests(unittest.TestCase):
         self.assertEqual(parser.parse("\n\n\rabc"), "abc")
         self.assertEqual(parser.parse("abc "), "abc")
         self.assertRaises(FroParseError, parser.parse, "ab c")
+        self.assertEqual(interface.comp([parser]).get().parse("abc "), "abc")
 
     # tests for built-in parsers
 
