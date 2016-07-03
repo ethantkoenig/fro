@@ -64,19 +64,24 @@ class AbstractChomper(object):
         :param args: arguments
         :return: result of function application
         """
-        assert isinstance(tracker, FroParseErrorTracker) # TODO
         try:
             return func(*args)
         except StandardError as e:
             tracker.urgent_error(str(e), start_index, end_index, e)
 
-    def _log_error(self, tracker, base_msg, start_index, end_index=None):
+    def _log_error(self, tracker, base_msg, start_index, end_index):
         """
         Convenience method to add a parse error to the tracker
         """
-        end_index = start_index + 1 if end_index is None else end_index
         msg = base_msg if self._name is None else "{} when parsing {}".format(base_msg, self._name)
         tracker.report_error(msg, start_index, end_index)
+
+    @staticmethod
+    def _next_index(s, index):
+        """
+        Convenience method for safely incrementing a string index
+        """
+        return index + 1 if index < len(s) else index
 
 
 class FroParseErrorTracker(object):
@@ -161,9 +166,15 @@ class GroupRegexChomper(AbstractChomper):
     def chomp(self, s, index, tracker):
         match = self._regex.match(s, index)
         if match is None:
-            self._log_error(tracker, "Expected pattern {}".format(self._regex.pattern), index)
+            msg = "Expected pattern {}".format(self._regex.pattern)
+            self._log_error(tracker, msg, index, self._next_index(s, index))
             return None
         end_index = match.end()
+        if end_index < len(s):
+            msg = "Unexpected character: {}".format(repr(s[end_index]))
+            self._log_error(tracker, msg, end_index, self._next_index(s, index))
+        elif end_index > len(s):
+            raise AssertionError("Invalid index")
         return match.groups(), end_index
 
 
@@ -252,13 +263,13 @@ class RegexChomper(AbstractChomper):
         match = self._regex.match(s, index)
         if match is None:
             msg = "Expected pattern {}".format(repr(self._regex.pattern))
-            self._log_error(tracker, msg, index)
+            self._log_error(tracker, msg, index, self._next_index(s, index))
             return None
         start_index = index
         end_index = match.end()
         if end_index < len(s):
             msg = "Unexpected character: {}".format(repr(s[end_index]))
-            self._log_error(tracker, msg, end_index)
+            self._log_error(tracker, msg, end_index, self._next_index(s, index))
         elif end_index > len(s):
             raise AssertionError("Invalid index")
         return s[start_index:end_index], end_index

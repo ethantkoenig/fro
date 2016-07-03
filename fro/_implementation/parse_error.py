@@ -19,23 +19,25 @@ class FroParseError(Exception):
         self._cause = cause
 
     def __str__(self):
-        first_line = "{m} at indices {s} to {e}".format(
-            m=self._message,
-            s=self._start_index,
-            e=self._end_index)
-        printable = pretty_printing.PrintableString(self._string)
-        second_line = "Substring : \"{}\"".format(printable.substring(
-            self._start_index,
-            self._end_index,
-            max_length=67))
-        context_start = max(0, self._start_index - 10)
-        context_end = min(len(self._string), self._end_index + 10)
-        third_line = "Context   : \"{}\"".format(printable.substring(
-            context_start,
-            context_end,
-            max_length=67))
-        return "\n".join([first_line, second_line, third_line])
-
+        try: # TODO
+            first_line = "{m} at indices {s} to {e}".format(
+                m=self._message,
+                s=self._start_index,
+                e=self._end_index)
+            printable = pretty_printing.PrintableString(self._string)
+            second_line = "Substring:" + printable.substring(
+                self._start_index,
+                self._end_index,
+                max_length=70)
+            context_start = max(0, self._start_index - 15)
+            context_end = min(len(self._string), self._end_index + 15)
+            third_line = "Context  :" + printable.substring(
+                context_start,
+                context_end,
+                max_length=70)
+            return "\n".join([first_line, second_line, third_line])
+        except Exception as e:
+            print(str(e))
     def cause(self):
         return self._cause
 
