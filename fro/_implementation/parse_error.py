@@ -1,5 +1,6 @@
 from fro._implementation import pretty_printing
 
+
 class FroParseError(Exception):
     """
     An exception for parsing failures
@@ -19,27 +20,20 @@ class FroParseError(Exception):
         self._cause = cause
 
     def __str__(self):
-        try: # TODO
-            first_line = "{m} at indices {s} to {e}".format(
-                m=self._message,
-                s=self._start_index,
-                e=self._end_index)
-            printable = pretty_printing.PrintableString(self._string)
-            second_line = "Substring:" + printable.substring(
-                self._start_index,
-                self._end_index,
-                max_length=70)
-            context_start = max(0, self._start_index - 15)
-            context_end = min(len(self._string), self._end_index + 15)
-            third_line = "Context  :" + printable.substring(
-                context_start,
-                context_end,
-                max_length=70)
-            return "\n".join([first_line, second_line, third_line])
-        except Exception as e:
-            print(str(e))
+        first_line = "{m} at indices {s} to {e}".format(
+            m=self._message,
+            s=self._start_index,
+            e=self._end_index)
+        return "\n".join([first_line, self.context()])
+
     def cause(self):
         return self._cause
+
+    def context(self):
+        return pretty_printing.printable_substring_with_context(
+                self._string,
+                self._start_index,
+                self._end_index)
 
     def end_index(self):
         return self._end_index

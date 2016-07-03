@@ -2,53 +2,43 @@
 Various pretty-printing and string-formatting utilities
 """
 
-import pprint
+
+def printable_substring_with_context(string, start_index, end_index, context=10, max_len=80):
+    """
+    :param string: string
+    :param start_index: start index of substring
+    :param end_index: end index of substring
+    :param context: length of context sections
+    :param max_len: max length of lines in result
+    :return: A pretty-printable string showing the specified substring along with before
+        and after context
+    """
+    before_str = string[max(0, start_index - context):start_index]
+    sub_str = string[start_index:end_index]
+    end_str = string[end_index:min(len(string), end_index + context)]
+
+    lines = [
+        "(strings shown with quotes, contents of long strings may be replaced with ...)",
+        "CONTEXT (BEFORE):",
+        _printable_string(before_str, max_len),
+        "SUBSTRING:",
+        _printable_string(sub_str, max_len),
+        "CONTEXT (AFTER):",
+        _printable_string(end_str, max_len)
+    ]
+    return "\n".join(lines)
 
 
-class PrintableString(object):
-
-    def __init__(self, string_to_print):
-        self._escaped_string, self._indices = self._escape(string_to_print)
-
-    def string(self):
-        return self._escaped_string
-
-    def round_raw_index_up(self, index):
-        return min(i for i in self._indices if i >= index)
-
-    def round_raw_index_down(self, index):
-        return max(i for i in self._indices if i <= index)
-
-    def raw_index_of_char(self, index):
-        return self._indices[index]
-
-    def length_of(self, index):
-        return self._indices[index + 1] - self._indices[index]
-
-    def substring(self, start_index, end_index, max_length=80):
-        raw_start = self._indices[start_index]
-        raw_end = self._indices[end_index]
-        if raw_end - raw_start <= max_length:
-            return self._escaped_string[raw_start:raw_end]
-        offset = (max_length - 4) / 2
-        raw_mid1 = self.round_raw_index_down(raw_start + offset)
-        raw_mid2 = self.round_raw_index_up(raw_end - offset)
-        return self._escaped_string[raw_start:raw_mid1] + "..."\
-               + self._escaped_string[raw_mid2:raw_end]
-
-    @staticmethod
-    def _escape(s):
-        """
-        :param s: string to escape
-        :return: escaped string, list of raw indices indexed by char indices
-        """
-        escaped_chars = []
-        indices = []
-        len_so_far = 0
-        for char in s:
-            escaped_char = pprint.pformat(char)[1:-1]
-            escaped_chars.append(escaped_char)
-            indices.append(len_so_far)
-            len_so_far += len(escaped_char)
-        indices.append(len_so_far)
-        return "".join(escaped_chars), indices
+def _printable_string(string, max_len=80):
+    """
+    :param string: string
+    :param max_len: maximum length
+    :return: printable version of the given string adhering to the maximum length
+    """
+    if max_len < 3:
+        raise ValueError("max_len is {0}, must be at least 3".format(max_len))
+    repred_str = repr(string)
+    if len(repred_str) < max_len:
+        return repred_str
+    offset = (max_len - 3) // 2
+    return repred_str[:offset] + "..." + repred_str[-offset:]

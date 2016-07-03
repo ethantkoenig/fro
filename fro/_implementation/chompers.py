@@ -183,7 +183,7 @@ class NestedChomper(AbstractChomper):
     def __init__(self, open_regex_string, close_regex_string, fertile=True,
                  name=None, quiet=False):
         AbstractChomper.__init__(self, fertile, name, quiet)
-        self._init_regex = re.compile(open_regex_string)
+        self._init_chomper = RegexChomper(open_regex_string)
         self._open_regex = re.compile(r".*?({})".format(open_regex_string))
         self._close_regex = re.compile(r".*?({})".format(close_regex_string))
         self._open_regex_string = open_regex_string
@@ -191,10 +191,11 @@ class NestedChomper(AbstractChomper):
 
     def chomp(self, s, index, tracker):
         start_index = index
-        init_match = self._init_regex.match(s, index)
-        if init_match is None:
+        chomp_result = self._init_chomper.chomp(s, index, tracker)
+        if chomp_result is None:
             return None
-        start_inside_index = index = end_index = init_match.end()
+        _, index = chomp_result
+        start_inside_index = end_index = index
         nesting_level = 1
         while nesting_level > 0:
             open_match = self._open_regex.match(s, index)
