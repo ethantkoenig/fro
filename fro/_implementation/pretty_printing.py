@@ -3,19 +3,19 @@ Various pretty-printing and string-formatting utilities
 """
 
 
-def printable_substring_with_context(string, start_index, end_index, context=10, max_len=80):
+def printable_substring_with_context(string, start_index, end_index, context_len=10, max_len=80):
     """
     :param string: string
     :param start_index: start index of substring
     :param end_index: end index of substring
-    :param context: length of context sections
+    :param context_len: length of context sections
     :param max_len: max length of lines in result
     :return: A pretty-printable string showing the specified substring along with before
         and after context
     """
-    before_str = string[max(0, start_index - context):start_index]
+    before_str = string[max(0, start_index - context_len):start_index]
     sub_str = string[start_index:end_index]
-    end_str = string[end_index:min(len(string), end_index + context)]
+    end_str = string[end_index:min(len(string), end_index + context_len)]
 
     lines = [
         "(strings shown with quotes, contents of long strings may be replaced with ...)",

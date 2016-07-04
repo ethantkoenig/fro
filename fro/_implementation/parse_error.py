@@ -9,14 +9,14 @@ class FroParseError(Exception):
         """
         :param string: string being parsed
         :param message: description of error
-        :param start_index: beginning index of problematic region
-        :param end_index: end index of problematic region
-        :param cause: Exception that triggered this exception.
+        :param start_index: beginning index of substring causing error
+        :param end_index: end index of substring causing error
+        :param cause: Exception that triggered this exception
         """
         self._string = string
         self._message = message
         self._start_index = start_index
-        self._end_index = end_index if end_index is not None else start_index + 1
+        self._end_index = end_index if end_index is not None else min(start_index + 1, len(string))
         self._cause = cause
 
     def __str__(self):

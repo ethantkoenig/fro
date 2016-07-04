@@ -17,6 +17,7 @@ class AbstractChomper(object):
         """
         :param fertile: if the parser produces a meaningful value
         :param name: name of parser, for error messages
+        :param quiet: if the parser should be "quiet" (not raise errors on parsing failures)
         """
         self._fertile = fertile
         self._name = name
@@ -32,6 +33,9 @@ class AbstractChomper(object):
         return self._quiet
 
     def clone(self, fertile=None, name=None, quiet=None):
+        """
+        :return: a chomper identical to self, except with the specified values
+        """
         fertile = fertile if fertile is not None else self._fertile
         name = name if name is not None else self._name
         quiet = quiet if quiet is not None else self._quiet
@@ -67,8 +71,6 @@ class AbstractChomper(object):
         :param tracker: FroParseErrorTracker
         :param start_index: start index of relevant region
         :param end_index: end index of relevant region
-        :param func: function
-        :param args: arguments
         :return: result of function application
         """
         try:
@@ -86,7 +88,7 @@ class AbstractChomper(object):
         :param s: string to parse
         :param index: index of s to start at
         :param tracker: FroParseErrorTracker - tracks encountered errors
-        :return: (t, index) : value parsed, and first "unconsumed" index
+        :return: tuple (value parsed, first "unconsumed" index)
         """
         return None  # must be implemented by subclasses
 
@@ -168,7 +170,7 @@ class CompositionChomper(AbstractChomper):
     def __init__(self, parsers, separator=None, fertile=True, name=None, quiet=False):
         AbstractChomper.__init__(self, fertile, name, quiet)
         self._parsers = list(parsers)
-        self._separator = separator  # may be None
+        self._separator = separator  # self._separator may be None
 
     def _chomp(self, s, index, tracker):
         values = []
@@ -324,7 +326,7 @@ class SequenceChomper(AbstractChomper):
                  fertile=True, name=None, quiet=False):
         AbstractChomper.__init__(self, fertile, name, quiet)
         self._element = element
-        self._separator = separator  # may be None
+        self._separator = separator  # self._separator may be None
         self._at_start = at_start and separator is not None
         self._at_end = at_end and separator is not None
 

@@ -134,7 +134,7 @@ class FroTests(unittest.TestCase):
         for n in range(10):
             for m in range(10):
                 s = "{n},{m}".format(n=n, m=m)
-                self.assertEqual(parser.parse(s), n + m)
+                self.assertEqual(parser.parse(s), f(n, m))
 
     def test_maybe1(self):
         maybep = fro.rgx(r"ab").maybe()
@@ -192,5 +192,4 @@ def random_float():
 
 
 if __name__ == "__main__":
-
     unittest.main()

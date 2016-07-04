@@ -33,9 +33,7 @@ class FroParser(object):
 
     def name(self, name):
         """
-        Set a name for the parser, to be used in error messages
-        :param name: name for parser
-        :return: a copy of the called parser, with set error message
+        :return: a parser identical to this, but with specified name
         """
         return FroParser(self._chomper.clone(name=name))
 
@@ -49,6 +47,9 @@ class FroParser(object):
 
     def quiet(self):
         return FroParser(self._chomper.clone(quiet=True))
+
+    def loud(self):
+        return FroParser(self._chomper.clone(quiet=False))
 
     def lstrip(self):
         if self._chomper.fertile():
