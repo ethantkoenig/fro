@@ -138,7 +138,9 @@ class FroParseErrorTracker(object):
         return None if len(self._names) == 0 else self._names[-1]
 
     def report_error(self, message, start_index, end_index, cause=None):
-        error = parse_error.FroParseError(self._string, message, start_index, end_index, cause)
+        name = self.current_name()
+        error = parse_error.FroParseError(self._string, message, start_index,
+                                          end_index, name, cause)
         if self._error is None or error.end_index() >= self._error.end_index():
             self._error = error
 
@@ -146,7 +148,9 @@ class FroParseErrorTracker(object):
         return self._error
 
     def urgent_error(self, message, start_index, end_index, cause=None):
-        raise parse_error.FroParseError(self._string, message, start_index, end_index, cause)
+        name = self.current_name()
+        raise parse_error.FroParseError(self._string, message, start_index,
+                                        end_index, name, cause)
 
 
 # Chomper subclasses
