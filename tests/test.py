@@ -1,9 +1,9 @@
 # coding=utf-8
-import math
 import random
 import unittest
 
 import fro
+import utils
 
 
 class FroTests(unittest.TestCase):
@@ -172,7 +172,7 @@ class FroTests(unittest.TestCase):
 
     def test_floatp(self):
         for _ in range(100):
-            f = random_float()
+            f = utils.random_float()
             result = fro.floatp.parse(str(f))
             self.assertTrue(abs(f - result) < 1e-6 or abs(f / result - 1) < 1e-6)
 
@@ -182,14 +182,6 @@ class FroTests(unittest.TestCase):
         for _ in range(100):
             n = random.getrandbits(100)
             self.assertEqual(fro.intp.parse(str(n)), n)
-
-# utilities
-
-
-def random_float():
-    abs_val = math.exp(random.uniform(-200, 200))
-    return abs_val if random.random() < 0.5 else -abs_val
-
 
 if __name__ == "__main__":
     unittest.main()

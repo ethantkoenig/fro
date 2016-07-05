@@ -44,6 +44,11 @@ class AbstractChomper(object):
         carbon._name = name
         carbon._quiet = quiet
         return carbon
+
+    def unname(self):
+        carbon = copy.copy(self)
+        carbon._name = None
+        return carbon
     
     def chomp(self, s, index, tracker):
         """

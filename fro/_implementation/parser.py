@@ -26,6 +26,9 @@ class FroParser(object):
         if index < len(s):
             if self._chomper.quiet():
                 return None
+            error = tracker.retrieve_error()
+            if error is not None:
+                raise error
             msg = "Unexpected character {}".format(s[index:index+1])
             msg_obj = parse_error.FroParseError.Message(msg)
             raise parse_error.FroParseError(s, [msg_obj], index, index + 1)
@@ -73,6 +76,9 @@ class FroParser(object):
 
     def strip(self):
         return self.lstrip().rstrip()
+
+    def unname(self):
+        return FroParser(self._chomper.unname())
 
     def get(self):
         return self >> (lambda x: x)

@@ -72,8 +72,8 @@ def seq(value, sep=None, sep_at_start=False, sep_at_end=False, name=None):
 
 # nothing before decimal or something before decimal
 _floatp = r"(-?\.[0-9]+)|(-?[0-9]+(\.[0-9]*)?)"
-floatp = rgx(r"{}(e[-+]?[0-9]+)?".format(_floatp)) | float
+floatp = (rgx(r"{}(e[-+]?[0-9]+)?".format(_floatp)) | float).name("float")
 
-intp = rgx(r"-?[0-9]+", name="int") | int
-natp = rgx(r"[0-9]+", name="non-negative int") | int
-posintp = rgx(r"0*[1-9][0-9]*", name="positive int") | int
+intp = (rgx(r"-?[0-9]+") | int).name("int")
+natp = (rgx(r"[0-9]+") | int).name("non-negative int")
+posintp = (rgx(r"0*[1-9][0-9]*") | int).name("positive int")
