@@ -74,9 +74,6 @@ def seq(value, sep=None, sep_at_start=False, sep_at_end=False, name=None):
 _floatp = r"(-?\.[0-9]+)|(-?[0-9]+(\.[0-9]*)?)"
 floatp = rgx(r"{}(e[-+]?[0-9]+)?".format(_floatp)) | float
 
-intp = rgx(r"-?[0-9]+") | int
-natp = rgx(r"[0-9]+") | int
-posintp = rgx(r"0*[1-9][0-9]*") | int
-
-
-
+intp = rgx(r"-?[0-9]+", name="int") | int
+natp = rgx(r"[0-9]+", name="non-negative int") | int
+posintp = rgx(r"0*[1-9][0-9]*", name="positive int") | int
