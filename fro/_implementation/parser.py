@@ -1,4 +1,4 @@
-from fro._implementation import chompers
+from fro._implementation import chompers, parse_error
 
 
 class FroParser(object):
@@ -26,7 +26,9 @@ class FroParser(object):
         if index < len(s):
             if self._chomper.quiet():
                 return None
-            raise tracker.retrieve_error()
+            msg = "Unexpected character {}".format(s[index:index+1])
+            msg_obj = parse_error.FroParseError.Message(msg)
+            raise parse_error.FroParseError(s, [msg_obj], index, index + 1)
         elif index > len(s):
             raise AssertionError("Invalid index")  # should never happen
         return value

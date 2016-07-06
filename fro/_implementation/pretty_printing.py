@@ -3,7 +3,7 @@ Various pretty-printing and string-formatting utilities
 """
 
 
-def printable_substring_with_context(string, start_index, end_index, context_len=10, max_len=80):
+def printable_substring_with_context(string, start_index, end_index, context_len=50, max_len=80):
     """
     :param string: string
     :param start_index: start index of substring
@@ -18,7 +18,7 @@ def printable_substring_with_context(string, start_index, end_index, context_len
     end_str = string[end_index:min(len(string), end_index + context_len)]
 
     lines = [
-        "(strings shown with quotes, contents of long strings may be replaced with ...)",
+        "(strings shown with quotes, long contents may be replaced with ...)",
         "CONTEXT (BEFORE):",
         _printable_string(before_str, max_len),
         "SUBSTRING:",

@@ -93,13 +93,11 @@ class AbstractChomper(object):
         return None  # must be implemented by subclasses
 
     @staticmethod
-    def _log_error(tracker, base_msg, start_index, end_index):
+    def _log_error(tracker, message, start_index, end_index):
         """
         Convenience method to add a parse error to the tracker
         """
-        name = tracker.current_name()
-        msg = base_msg if name is None else "{} when parsing {}".format(base_msg, name)
-        tracker.report_error(msg, start_index, end_index)
+        tracker.report_error(message, start_index, end_index)
 
     @staticmethod
     def _next_index(s, index):
@@ -115,7 +113,9 @@ class FroParseErrorTracker(object):
     (i.e. occurred at farthest index). Also tracks names of encountered chompers.
     """
     def __init__(self, string):
-        self._error = None
+        self._messages = []
+        self._start_index = -1
+        self._end_index = -1
         self._names = []
         self._string = string
 
@@ -137,20 +137,32 @@ class FroParseErrorTracker(object):
     def current_name(self):
         return None if len(self._names) == 0 else self._names[-1]
 
-    def report_error(self, message, start_index, end_index, cause=None):
-        name = self.current_name()
-        error = parse_error.FroParseError(self._string, message, start_index,
-                                          end_index, name, cause)
-        if self._error is None or error.end_index() >= self._error.end_index():
-            self._error = error
+    def report_error(self, message, start_index, end_index):
+        if start_index < self._start_index:
+            return
+        elif start_index == self._start_index:
+            if end_index < self._end_index:
+                return
+            elif end_index == self._end_index:
+                self._messages.append(parse_error.FroParseError.Message(
+                    message, self.current_name()))
+                return
+        self._end_index = end_index
+        self._start_index = start_index
+        self._messages = [parse_error.FroParseError.Message(
+            message, self.current_name())]
 
     def retrieve_error(self):
-        return self._error
+        if len(self._messages) == 0:
+            return None
+        return parse_error.FroParseError(self._string, self._messages,
+                                         self._start_index, self._end_index)
 
     def urgent_error(self, message, start_index, end_index, cause=None):
         name = self.current_name()
-        raise parse_error.FroParseError(self._string, message, start_index,
-                                        end_index, name, cause)
+        msg_obj = parse_error.FroParseError.Message(message, name)
+        raise parse_error.FroParseError(self._string, [msg_obj], start_index,
+                                        end_index, cause)
 
 
 # Chomper subclasses
@@ -214,16 +226,10 @@ class GroupRegexChomper(AbstractChomper):
     def _chomp(self, s, index, tracker):
         match = self._regex.match(s, index)
         if match is None:
-            msg = "Expected pattern {}".format(self._regex.pattern)
+            msg = "Expected pattern \'{}\'".format(self._regex.pattern)
             self._log_error(tracker, msg, index, self._next_index(s, index))
             return None
-        end_index = match.end()
-        if end_index < len(s):
-            msg = "Unexpected character: {}".format(repr(s[end_index]))
-            self._log_error(tracker, msg, end_index, self._next_index(s, end_index))
-        elif end_index > len(s):
-            raise AssertionError("Invalid index")
-        return match.groups(), end_index
+        return match.groups(), match.end()
 
 
 class NestedChomper(AbstractChomper):
@@ -311,16 +317,11 @@ class RegexChomper(AbstractChomper):
     def _chomp(self, s, index, tracker):
         match = self._regex.match(s, index)
         if match is None:
-            msg = "Expected pattern {}".format(repr(self._regex.pattern))
+            msg = "Expected pattern \'{}\'".format(self._regex.pattern)
             self._log_error(tracker, msg, index, self._next_index(s, index))
             return None
         start_index = index
         end_index = match.end()
-        if end_index < len(s):
-            msg = "Unexpected character: {}".format(repr(s[end_index]))
-            self._log_error(tracker, msg, end_index, self._next_index(s, end_index))
-        elif end_index > len(s):
-            raise AssertionError("Invalid index")
         return s[start_index:end_index], end_index
 
 
