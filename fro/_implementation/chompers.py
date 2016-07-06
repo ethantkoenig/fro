@@ -220,7 +220,7 @@ class GroupRegexChomper(AbstractChomper):
         end_index = match.end()
         if end_index < len(s):
             msg = "Unexpected character: {}".format(repr(s[end_index]))
-            self._log_error(tracker, msg, end_index, self._next_index(s, index))
+            self._log_error(tracker, msg, end_index, self._next_index(s, end_index))
         elif end_index > len(s):
             raise AssertionError("Invalid index")
         return match.groups(), end_index
@@ -318,7 +318,7 @@ class RegexChomper(AbstractChomper):
         end_index = match.end()
         if end_index < len(s):
             msg = "Unexpected character: {}".format(repr(s[end_index]))
-            self._log_error(tracker, msg, end_index, self._next_index(s, index))
+            self._log_error(tracker, msg, end_index, self._next_index(s, end_index))
         elif end_index > len(s):
             raise AssertionError("Invalid index")
         return s[start_index:end_index], end_index
