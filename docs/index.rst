@@ -13,6 +13,7 @@ Fro documentation
     parser
     api
     examples
+    report_bugs
 
 
 

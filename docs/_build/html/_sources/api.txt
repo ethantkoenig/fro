@@ -9,6 +9,8 @@ Parser
 ``Parser`` objects are immutable. Therefore, many ``Parser`` methods return a new parser instead of modifying the called
 parser.
 
+For explanations of terminology like "chomp" and "significant", see :doc:`parser`.
+
 .. py:class:: Parser(object):
 
     .. py:method:: __neg__()
@@ -52,6 +54,10 @@ parser.
             parser = fro.comp(r"~\(", fro.intp, r"~\)").get()
             parser.parse("(-3)")  # evaluates to -3
 
+    .. py:method:: loud()
+
+        Returns a ``Parser`` that is equivalent to ``self``, but raises a ``FroParseError``
+        on parsing failures.
 
     .. py:method:: lstrip()
 
@@ -63,6 +69,12 @@ parser.
         Returns a ``Parser`` object equivalent to ``self``, but defaults to consuming none of the input
         string and producing ``default`` when ``self`` fails to chomp a string. See :doc:`parser` for an explanation of
         chomping.
+
+        Example::
+
+            parser = fro.comp([fro.rgx(r"ab+").maybe("a"), fro.intp])
+            parser.parse("abb3")  # evaluates to ("abb", 3)
+            parser.parse("87")  # evaluates to ("a", 87)
 
     .. py:method:: name(name)
 
@@ -154,6 +166,12 @@ on them.
     the corresponding match. See the `re module <https://docs.python.org/2/library/re.html>`_ for a description of
     regular expression groups.
 
+    Example::
+
+        parser = fro.group_rgx(r"(x*)(y*)(z*)")
+        parser.parse("xxz")  # evaluates to ("xx", "", "z")
+        parser.parse("wxyz")  # fails
+
 .. py:function:: nested(open_regex_string, close_regex_string[, name=None])
 
     Returns a ``Parser`` that parses well-nested sequences where the opening token is given by ``open_regex_string`` and
@@ -226,7 +244,7 @@ Exceptions raised by the ``parse(..)`` method upon parsing failures.
 
     .. py:method:: __str__()
 
-        A human readable description of the error. Include both the error message, and extra information describing the
+        A human readable description of the error. Include both the error messages, and extra information describing the
         location of the error.
 
     .. py:method:: cause()
@@ -236,16 +254,32 @@ Exceptions raised by the ``parse(..)`` method upon parsing failures.
 
     .. py:method:: context()
 
-        Returns a string that depicts where in the input string the parsing error occured.
+        Returns a pretty-printable string that depicts where in the input string the parsing error occurred.
 
     .. py:method:: end_index()
 
-        Returns the end index of the problematic substring of the input
+        Returns the end index of the substring of the input that caused the error
 
-    .. py:method:: message()
+    .. py:method:: messages()
 
-        Returns the error message.
+        Returns a non-empty list of ``Message`` objects which describe the reasons for failure.
 
     .. py:method:: start_index()
 
-        Returns the beginning index of the problematic substring of the input
+        Returns the beginning index of the substring of the input that caused the error
+
+    .. py:class:: Message
+
+        Each ``Message`` object represents an error message describing a reason for failure.
+
+        .. py:method:: __str__()
+
+            Returns a string representation of the message that includes both the content and parser name.
+
+        .. py:method:: content()
+
+            Returns the content of the error message
+
+        .. py:method:: name()
+
+            Returns the name of the parser at which the message was generated, or ``None`` if the parser had no name.

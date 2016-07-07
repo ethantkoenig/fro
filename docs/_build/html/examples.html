@@ -31,6 +31,7 @@
 
   
     <link rel="top" title="Fro 1.0.0 documentation" href="index.html"/>
+        <link rel="next" title="Reporting Bugs" href="report_bugs.html"/>
         <link rel="prev" title="Fro Interface" href="api.html"/> 
 
   
@@ -89,6 +90,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#example-2-tex">Example 2: TeX</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="report_bugs.html">Reporting Bugs</a></li>
 </ul>
 
             
@@ -166,7 +168,8 @@ need generate an <code class="docutils literal"><span class="pre">EmailDirectory
         <span class="bp">self</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span> <span class="c1"># dict from Name to EmailAddress</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">entry_strings</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{n}</span><span class="s2"> : </span><span class="si">{a}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">addr</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">addr</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">entry_strings</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{n}</span><span class="s2"> : </span><span class="si">{a}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="n">addr</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">addr</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">entry_strings</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -238,7 +241,7 @@ a (simplified) TeX file into a <code class="docutils literal"><span class="pre">
 <span class="n">documentp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">seq</span><span class="p">(</span><span class="n">elementp</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">r&quot;\s+&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tex document&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">TexDocument</span>
 
 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">documentp</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">documentp</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -250,6 +253,8 @@ a (simplified) TeX file into a <code class="docutils literal"><span class="pre">
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="report_bugs.html" class="btn btn-neutral float-right" title="Reporting Bugs" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="api.html" class="btn btn-neutral" title="Fro Interface" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -24,7 +24,8 @@ class EmailDirectory(object):
         self.entries = dict(entries)
 
     def __str__(self):
-        entry_strings = ("{n} : {a}".format(n=name, a=addr) for (name, addr) in self.entries.items())
+        entry_strings = ("{n} : {a}".format(n=name, a=addr)
+                         for (name, addr) in self.entries.items())
         return "\n".join(entry_strings)
 
 

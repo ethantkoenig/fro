@@ -23,7 +23,10 @@ class FroParseError(Exception):
         self._cause = cause
 
     def __str__(self):
-        return "\n".join([self.messages_string(), self.context()])
+        return "\n".join([
+            "At indices {0} to {1}".format(self._start_index, self._end_index),
+            "\n".join(str(x) for x in self._messages),
+            self.context()])
 
     def cause(self):
         return self._cause
@@ -37,20 +40,13 @@ class FroParseError(Exception):
     def end_index(self):
         return self._end_index
 
-    def messages(self):  # TODO name
-        return self._messages
-
-    def messages_string(self):  # TODO name
-        return "\n".join([
-            "At indices {0} to {1}:".format(self._start_index, self._end_index),
-            "\n".join(str(x) for x in self._messages)
-        ])
+    def messages(self):
+        return list(self._messages)
 
     def start_index(self):
         return self._start_index
 
-    class Message(object):  # TODO name
-
+    class Message(object):
         def __init__(self, content, name=None):
             self._content = content
             self._name = name

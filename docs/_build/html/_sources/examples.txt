@@ -40,7 +40,8 @@ need generate an ``EmailDirectory`` object from this file::
             self.entries = dict(entries) # dict from Name to EmailAddress
 
         def __str__(self):
-            entry_strings = ("{n} : {a}".format(n=name, a=addr) for (name, addr) in self.entries.items())
+            entry_strings = ("{n} : {a}".format(n=name, a=addr)
+                             for (name, addr) in self.entries.items())
             return "\n".join(entry_strings)
 
 Using fro, you can write code for parsing the text file in under ten lines::
@@ -113,4 +114,4 @@ With fro, you can do this quickly and painlessly::
     documentp = fro.seq(elementp, sep=r"\s+", name="Tex document") | TexDocument
 
     with open("input.txt", "r") as input_file:
-        return documentp.parse(input_file.read()
+        return documentp.parse(input_file.read())

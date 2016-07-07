@@ -92,6 +92,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="report_bugs.html">Reporting Bugs</a></li>
 </ul>
 
             
@@ -142,6 +143,7 @@
 <h2>Parser<a class="headerlink" href="#parser" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal"><span class="pre">Parser</span></code> objects are immutable. Therefore, many <code class="docutils literal"><span class="pre">Parser</span></code> methods return a new parser instead of modifying the called
 parser.</p>
+<p>For explanations of terminology like &#8220;chomp&#8221; and &#8220;significant&#8221;, see <a class="reference internal" href="parser.html"><span class="doc">Parser Objects</span></a>.</p>
 <dl class="class">
 <dt>
 <code class="descname">Parser(object):</code></dt>
@@ -197,6 +199,13 @@ one element. Equivalent to <code class="docutils literal"><span class="pre">self
 </dd></dl>
 
 <dl class="method">
+<dt id="loud">
+<code class="descname">loud</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#loud" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> that is equivalent to <code class="docutils literal"><span class="pre">self</span></code>, but raises a <code class="docutils literal"><span class="pre">FroParseError</span></code>
+on parsing failures.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="lstrip">
 <code class="descname">lstrip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lstrip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> object that is equivalent to <code class="docutils literal"><span class="pre">self</span></code>, but ignores and
@@ -209,6 +218,12 @@ consumes leading whitespace.</p>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> object equivalent to <code class="docutils literal"><span class="pre">self</span></code>, but defaults to consuming none of the input
 string and producing <code class="docutils literal"><span class="pre">default</span></code> when <code class="docutils literal"><span class="pre">self</span></code> fails to chomp a string. See <a class="reference internal" href="parser.html"><span class="doc">Parser Objects</span></a> for an explanation of
 chomping.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;ab+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">maybe</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">),</span> <span class="n">fro</span><span class="o">.</span><span class="n">intp</span><span class="p">])</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;abb3&quot;</span><span class="p">)</span>  <span class="c1"># evaluates to (&quot;abb&quot;, 3)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;87&quot;</span><span class="p">)</span>  <span class="c1"># evaluates to (&quot;a&quot;, 87)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -308,6 +323,12 @@ will chomp with <code class="docutils literal"><span class="pre">sep</span></cod
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> that consumes the regular expression <code class="docutils literal"><span class="pre">regex_string</span></code>, and produces a tuple of the groups of
 the corresponding match. See the <a class="reference external" href="https://docs.python.org/2/library/re.html">re module</a> for a description of
 regular expression groups.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">group_rgx</span><span class="p">(</span><span class="s2">r&quot;(x*)(y*)(z*)&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;xxz&quot;</span><span class="p">)</span>  <span class="c1"># evaluates to (&quot;xx&quot;, &quot;&quot;, &quot;z&quot;)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;wxyz&quot;</span><span class="p">)</span>  <span class="c1"># fails</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -394,7 +415,7 @@ the returned parser will expected a separator even if there are no elements.</p>
 <dd><dl class="method">
 <dt id="FroParseError.__str__">
 <code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError.__str__" title="Permalink to this definition">¶</a></dt>
-<dd><p>A human readable description of the error. Include both the error message, and extra information describing the
+<dd><p>A human readable description of the error. Include both the error messages, and extra information describing the
 location of the error.</p>
 </dd></dl>
 
@@ -408,25 +429,49 @@ exception</p>
 <dl class="method">
 <dt id="FroParseError.context">
 <code class="descname">context</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError.context" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a string that depicts where in the input string the parsing error occured.</p>
+<dd><p>Returns a pretty-printable string that depicts where in the input string the parsing error occurred.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="FroParseError.end_index">
 <code class="descname">end_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError.end_index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the end index of the problematic substring of the input</p>
+<dd><p>Returns the end index of the substring of the input that caused the error</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="FroParseError.message">
-<code class="descname">message</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError.message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the error message.</p>
+<dt id="FroParseError.messages">
+<code class="descname">messages</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError.messages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a non-empty list of <code class="docutils literal"><span class="pre">Message</span></code> objects which describe the reasons for failure.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="FroParseError.start_index">
 <code class="descname">start_index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError.start_index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the beginning index of the problematic substring of the input</p>
+<dd><p>Returns the beginning index of the substring of the input that caused the error</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FroParseError.Message">
+<em class="property">class </em><code class="descname">Message</code><a class="headerlink" href="#FroParseError.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Each <code class="docutils literal"><span class="pre">Message</span></code> object represents an error message describing a reason for failure.</p>
+<dl class="method">
+<dt id="FroParseError.Message.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError.Message.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string representation of the message that includes both the content and parser name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FroParseError.Message.content">
+<code class="descname">content</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError.Message.content" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the content of the error message</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FroParseError.Message.name">
+<code class="descname">name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError.Message.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the name of the parser at which the message was generated, or <code class="docutils literal"><span class="pre">None</span></code> if the parser had no name.</p>
+</dd></dl>
+
 </dd></dl>
 
 </dd></dl>
