@@ -86,6 +86,7 @@
 <li class="toctree-l1"><a class="reference internal" href="api.html">Fro Interface</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#example-1-email-addresses">Example 1: Email Addresses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-2-tex">Example 2: TeX</a></li>
 </ul>
 </li>
 </ul>
@@ -186,6 +187,60 @@ need generate an <code class="docutils literal"><span class="pre">EmailDirectory
 </div>
 <p>Not only will this code exhibit the desired behavior, it will raise informative error messages when it encounters
 misformatted input.</p>
+</div>
+<div class="section" id="example-2-tex">
+<h2>Example 2: TeX<a class="headerlink" href="#example-2-tex" title="Permalink to this headline">¶</a></h2>
+<p>Suppose you want to parse a simplified TeX language. Each document consists of elements delimited by whitespace. Each
+element is either a command, of the form <code class="docutils literal"><span class="pre">\commandname</span></code> or <code class="docutils literal"><span class="pre">\commandname{argument}</span></code>, or raw text. You want to parse
+a (simplified) TeX file into a <code class="docutils literal"><span class="pre">TexDocument</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TexElement</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">pass</span>  <span class="c1"># &quot;abstract&quot; parent class</span>
+
+
+<span class="k">class</span> <span class="nc">TexCommand</span><span class="p">(</span><span class="n">TexElement</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">argument</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">argument</span> <span class="o">=</span> <span class="n">argument</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">argument</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;\</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">return</span> <span class="s2">&quot;\</span><span class="si">%s</span><span class="s2">{</span><span class="si">%s</span><span class="s2">}&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">argument</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TexText</span><span class="p">(</span><span class="n">TexElement</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span>
+
+
+<span class="k">class</span> <span class="nc">TexDocument</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">elements</span> <span class="o">=</span> <span class="n">elements</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With fro, you can do this quickly and painlessly:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># parser for TexText objects</span>
+<span class="n">textp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[^</span><span class="se">\\</span><span class="s2">s]+&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TeX text&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">TexText</span>
+
+<span class="c1"># parser for TexCommand objects</span>
+<span class="n">namep</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">group_rgx</span><span class="p">(</span><span class="s2">r&quot;</span><span class="se">\\</span><span class="s2">([^\{\s]+)&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="n">argumentp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">group_rgx</span><span class="p">(</span><span class="s2">r&quot;\{([^\}]*?)\}&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">maybe</span><span class="p">()</span>
+<span class="n">commandp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">namep</span><span class="p">,</span> <span class="n">argumentp</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TeX command&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">TexCommand</span>
+
+<span class="c1"># parser for TexDocument objects</span>
+<span class="n">elementp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">alt</span><span class="p">([</span><span class="n">commandp</span><span class="p">,</span> <span class="n">textp</span><span class="p">])</span>
+<span class="n">documentp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">seq</span><span class="p">(</span><span class="n">elementp</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">r&quot;\s+&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tex document&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">TexDocument</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">documentp</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+</div>
 </div>
 </div>
 

@@ -2,18 +2,18 @@ import fro
 
 
 class TexElement(object):
-    pass
+    pass  # "abstract" parent class
 
 
 class TexCommand(TexElement):
-    def __init__(self, name, content=None):
+    def __init__(self, name, argument=None):
         self.name = name
-        self.content = content
+        self.argument = argument
 
     def __str__(self):
-        if self.content is None:
+        if self.argument is None:
             return "\%s" % self.name
-        return "\%s{%s}" % (self.name, self.content)
+        return "\%s{%s}" % (self.name, self.argument)
 
 
 class TexText(TexElement):
@@ -36,10 +36,10 @@ class TexDocument(object):
 textp = fro.rgx(r"[^\\s]+", name="TeX text") | TexText
 
 # parser for TexCommand objects
-cmdbasep = fro.group_rgx(r"\\([^\{\s]+)").get()
-cmdcontentp = fro.group_rgx(r"\{([^\}]*?)\}").get().maybe()
-commandp = fro.comp([cmdbasep, cmdcontentp], name="TeX command") >> TexCommand
+namep = fro.group_rgx(r"\\([^\{\s]+)").get()
+argumentp = fro.group_rgx(r"\{([^\}]*?)\}").get().maybe()
+commandp = fro.comp([namep, argumentp], name="TeX command") >> TexCommand
 
 # parser for TexDocument objects
 elementp = fro.alt([commandp, textp])
-documentp = fro.seq(elementp, sep=r" ", name="Tex document") | TexDocument
+documentp = fro.seq(elementp, sep=r"\s+", name="Tex document") | TexDocument
