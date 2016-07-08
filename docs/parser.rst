@@ -35,7 +35,7 @@ consume an empty initial portion (which parsers are allowed to do).::
   fro.intp.parse("abc123")  # cannot chomp anything, an unsuccessful parse
 
 Combining parsers: composition
-------------------
+------------------------------
 
 With this model in place, it is much easier to make sense of what happens when you combine multiple parsers together.
 As a case study, let's consider parser composition. Given two parsers ``p1`` and ``p2``, the composition of ``p1`` and

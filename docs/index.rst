@@ -17,10 +17,9 @@ Fro documentation
 
 
 
-Indices and tables
+Indices and search
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
