@@ -7,3 +7,4 @@ data, abstracting away boilerplate code and making it easy to quickly write
 bug-free parsers.
 
 Fro is compatible with Python 2.7+ and Python 3.x, and can be installed via pip.
+Documentation for the module can be found at `<http://pythonhosted.org/fro>`_.
