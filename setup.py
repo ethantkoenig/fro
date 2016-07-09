@@ -10,7 +10,7 @@ with open(path.join(here, "README.rst"), "r") as f:
 
 setup(
     name="fro",
-    version="0.0.0",
+    version="1.1.0",
     description="A module for parsing string representations of objects",
     long_description=long_description,
     url="https://github.com/ethantkoenig/fro",
