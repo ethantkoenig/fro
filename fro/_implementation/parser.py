@@ -1,5 +1,4 @@
-from fro._implementation import parse_error
-import fro._implementation.chompers as chompers
+from fro._implementation import chompers, parse_error
 
 
 class FroParser(object):

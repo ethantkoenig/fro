@@ -4,8 +4,7 @@ The public interface exposed by the fro package
 
 from builtins import bytes, str
 
-from fro._implementation import parser
-import fro._implementation.chompers as chompers
+from fro._implementation import chompers, parser
 
 # --------------------------------------------------------------------
 # internals (put first to avoid use before def'n issues)
