@@ -1,43 +1,52 @@
-from fro._implementation.chompers.abstract import AbstractChomper
+from fro._implementation import iters
+from fro._implementation.chompers import abstract, chomp_error
 
 
-class SequenceChomper(AbstractChomper):
+class SequenceChomper(abstract.AbstractChomper):
 
-    def __init__(self, element, separator=None, at_start=False, at_end=False,
+    def __init__(self, element, reducer, separator=None,
                  fertile=True, name=None, quiet=False):
-        AbstractChomper.__init__(self, fertile, name, quiet)
+        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
         self._element = element
+        self._reducer = reducer
         self._separator = separator  # self._separator may be None
-        self._at_start = at_start and separator is not None
-        self._at_end = at_end and separator is not None
 
-    def _chomp(self, s, index, tracker):
-        rollback_index = index
-        if self._at_start:
-            chomp_result = self._separator.chomp(s, index, tracker)
-            if chomp_result is None:
-                return None if self._at_end else [], rollback_index
-            _, index = chomp_result
+    def _chomp(self, state, tracker):
+        iterable = SequenceIterable(self, state, tracker)
+        iterator = iter(iterable)
+        value = self._reducer(iterator)
+        iters.close(iterator)
+        return value
 
-        encountered_values = []
-        pending_value = None
+
+class SequenceIterable(object):
+    def __init__(self, chomper, state, tracker):
+        self._state = state
+        self._element = chomper._element
+        self._sep = chomper._separator  # may be None
+        self._tracker = tracker
+        self._failed_lookahead = chomper._failed_lookahead
+
+    def __iter__(self):
+        rollback_line = self._state.line()
+        rollback_col = self._state.column()
         while True:
-            chomp_result = self._element.chomp(s, index, tracker)
-            if chomp_result is None:
-                return encountered_values, rollback_index
-            value, index = chomp_result
-            if self._at_end:
-                pending_value = value
-            else:
-                rollback_index = index
-                encountered_values.append(value)
+            try:
+                yield self._element.chomp(self._state, self._tracker)
+                rollback_line = self._state.line()
+                rollback_col = self._state.column()
+            except chomp_error.ChompError as e:
+                if self._state.line() != rollback_line:
+                    self._failed_lookahead()
+                self._tracker.report_error(e)
+                self._state.reset_to(rollback_col)
+                return
 
-            if self._separator is not None:
-                chomp_result = self._separator.chomp(s, index, tracker)
-                if chomp_result is None:
-                    return encountered_values, rollback_index
-                _, index = chomp_result
-                if self._at_end:
-                    rollback_index = index
-                    encountered_values.append(pending_value)
-                    pending_value = None
+            if self._sep is not None:
+                try:
+                    self._sep.chomp(self._state, self._tracker)
+                except chomp_error.ChompError as e:
+                    if self._state.line() != rollback_line:
+                        self._tracker.urgent()
+                    self._tracker.report_error(e)
+                    return

@@ -5,7 +5,7 @@ class FroParseError(Exception):
     """
     An exception for parsing failures
     """
-    def __init__(self, string, messages, start_index, end_index=None, cause=None):
+    def __init__(self, chomp_errors, cause=None, filename=None):
         """
         :param string: string being parsed
         :param messages: non-empty list of Message objects
@@ -13,18 +13,20 @@ class FroParseError(Exception):
         :param end_index: end index of substring causing error
         :param cause: Exception that triggered this exception
         """
-        self._string = string
-        self._messages = messages
-        self._start_index = start_index
-        if end_index is None:
-            self._end_index = min(start_index + 1, len(string))
-        else:
-            self._end_index = end_index
+        self._messages = [_message_of_chomp_error(ce) for ce in chomp_errors]
+        self._location = chomp_errors[0].location()
         self._cause = cause
+        self._filename = filename
 
-    def __str__(self):
+    def __str__(self, index_from=1):
+        first_line = "At line {l}, column {c}".format(
+            l=self.line(index_from),
+            c=self.column(index_from))
+        if self._filename is not None:
+            first_line += " of " + self._filename
+
         return "\n".join([
-            "At indices {0} to {1}".format(self._start_index, self._end_index),
+            first_line,
             "\n".join(str(x) for x in self._messages),
             self.context()])
 
@@ -32,33 +34,41 @@ class FroParseError(Exception):
         return self._cause
 
     def context(self):
-        return pretty_printing.printable_substring_with_context(
-                self._string,
-                self._start_index,
-                self._end_index)
+        return pretty_printing.printable_string_index_with_context(
+                self._location.text(),
+                self.line(0))
 
-    def end_index(self):
-        return self._end_index
+    def column(self, index_from=1):
+        return self._location.column() + index_from
+
+    def filename(self):
+        return self._filename
+
+    def line(self, index_from=1):
+        return self._location.line() + index_from
 
     def messages(self):
         return list(self._messages)
 
-    def start_index(self):
-        return self._start_index
 
-    class Message(object):
-        def __init__(self, content, name=None):
-            self._content = content
-            self._name = name
+class Message(object):
+    def __init__(self, content, name=None):
+        self._content = content
+        self._name = name
 
-        def __str__(self):
-            if self._name is None:
-                return self._content
-            return "{0} when parsing {1}".format(self._content, self._name)
-
-        def content(self):
+    def __str__(self):
+        if self._name is None:
             return self._content
+        return "{0} when parsing {1}".format(self._content, self._name)
 
-        def name(self):
-            return self._name
+    def content(self):
+        return self._content
 
+    def name(self):
+        return self._name
+
+
+# ----------------------------- internals
+
+def _message_of_chomp_error(chomp_error):
+    return Message(chomp_error.message(), chomp_error.name())

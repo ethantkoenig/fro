@@ -1,44 +1,45 @@
-from fro._implementation.chompers.abstract import AbstractChomper
+from fro._implementation.chompers import abstract, chomp_error
 
 
-class DelegateChomper(AbstractChomper):
+class DelegateChomper(abstract.AbstractChomper):
     """
     Fro parser that delegates parsing to another parser
     """
     def __init__(self, delegate, fertile=True, name=None, quiet=False):
-        AbstractChomper.__init__(self, fertile, name, quiet)
+        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
         self._delegate = delegate
 
-    def _chomp(self, s, index, tracker):
-        return self._delegate.chomp(s, index, tracker)
+    def _chomp(self, state, tracker):
+        return self._delegate.chomp(state, tracker)
 
 
-class MapChomper(AbstractChomper):
+class MapChomper(abstract.AbstractChomper):
     """
     Fro parser that performs map operation on parsed values
     """
     def __init__(self, parser, func, fertile=True, name=None, quiet=False):
-        AbstractChomper.__init__(self, fertile, name, quiet)
+        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
         self._parser = parser
         self._func = func
 
-    def _chomp(self, s, index, tracker):
-        start_index = index
-        chomp_result = self._parser.chomp(s, index, tracker)
-        if chomp_result is None:
-            return None
-        value, index = chomp_result
-        return AbstractChomper._apply(tracker, start_index, index, self._func, value), index
+    def _chomp(self, state, tracker):
+        value = self._parser.chomp(state, tracker)
+        return abstract.AbstractChomper._apply(tracker, state, self._func, value)
 
 
-class OptionalChomper(AbstractChomper):
+class OptionalChomper(abstract.AbstractChomper):
     def __init__(self, child, default=None, fertile=True, name=None, quiet=False):
-        AbstractChomper.__init__(self, fertile, name, quiet)
+        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
         self._child = child
         self._default = default
 
-    def _chomp(self, s, index, tracker):
-        child_result = self._child.chomp(s, index, tracker)
-        if child_result is not None:
-            return child_result
-        return self._default, index
+    def _chomp(self, state, tracker):
+        line = state.line()
+        col = state.column()
+        try:
+            return self._child.chomp(state, tracker)
+        except chomp_error.ChompError as e:
+            if state.line() != line:
+                self._failed_lookahead(state, tracker)
+        state.reset_to(col)
+        return self._default

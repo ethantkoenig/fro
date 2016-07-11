@@ -16,7 +16,7 @@ class StreamTest(unittest.TestCase):
         self.assertEqual(stream.index(), -1)
         self.assertIsNone(stream.current())
         for index, element in enumerate(l):
-            self.assertEqual(stream.next(), element)
+            self.assertEqual(next(stream), element)
             self.assertEqual(stream.current(), element)
             if index + 1 < len(l):
                 self.assertTrue(stream.has_next())
@@ -32,10 +32,10 @@ class StreamTest(unittest.TestCase):
             stream = iters.Stream(l)
             for _ in range(length):
                 self.assertTrue(stream.has_next())
-                stream.next()  # should not raise
+                next(stream)  # should not raise
             self.assertFalse(stream.has_next())
-            self.assertRaises(StopIteration, stream.next)
-
+            for _ in range(5):
+                self.assertRaises(StopIteration, lambda: next(stream))
 
 if __name__ == "__main__":
     unittest.main()

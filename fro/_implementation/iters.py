@@ -1,3 +1,4 @@
+from builtins import object
 
 
 class Stream(object):
@@ -22,27 +23,31 @@ class Stream(object):
             return False
         return self._peek()
 
-    def next(self):
+    def index(self):
+        return self._index
+
+    def __next__(self):
         if self._at_end:
             raise StopIteration
         elif self._peeked_value_valid:
             self._current_value = self._peeked_value
         else:
             self._advance()
+        self._index += 1
         self._peeked_value_valid = False
         return self._current_value
 
     def _advance(self):
         if self._at_end:
             return
-        self._current_value = self._iterator.next()
+        self._current_value = next(self._iterator)
         self._peeked_value_valid = False
 
     def _peek(self):
         if self._peeked_value_valid:
             return True
         try:
-            self._peeked_value = self._iterator.next()
+            self._peeked_value = next(self._iterator)
             self._peeked_value_valid = True
             return True
         except StopIteration:
@@ -53,6 +58,6 @@ class Stream(object):
 def close(iterator):
     try:
         while True:
-            iterator.next()
+            next(iterator)
     except StopIteration:
         pass

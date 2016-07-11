@@ -1,14 +1,19 @@
-from fro._implementation.chompers.abstract import AbstractChomper
+from fro._implementation.chompers import abstract, chomp_error
 
 
-class AlternationChomper(AbstractChomper):
+class AlternationChomper(abstract.AbstractChomper):
     def __init__(self, chompers, fertile=True, name=None, quiet=False):
-        AbstractChomper.__init__(self, fertile, name, quiet)
+        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
         self._chompers = list(chompers)
 
-    def _chomp(self, s, index, tracker):
+    def _chomp(self, state, tracker):
+        col = state.column()
+        line = state.line()
         for chomper in self._chompers:
-            result = chomper.chomp(s, index, tracker)
-            if result is not None:
-                return result
-        return None
+            try:
+                return chomper.chomp(state, tracker)
+            except chomp_error.ChompError as e:
+                if state.line() != line:
+                    self._failed_lookahead(state, tracker)
+                self._log_error(e, tracker)
+                state.reset_to(col)

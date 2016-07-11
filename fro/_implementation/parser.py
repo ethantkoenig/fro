@@ -1,4 +1,4 @@
-from fro._implementation import chompers, parse_error
+from fro._implementation import chompers, iters, parse_error
 
 
 class FroParser(object):
@@ -10,31 +10,34 @@ class FroParser(object):
 
     # public interface
 
-    def parse(self, string_to_parse):
+    def parse(self, lines):
         """
         Parses the string into an object
         :param string_to_parse: string to parse
         :return: value parsed, or None if parse failed (and no exception was thrown)
         """
-        tracker = chompers.abstract.FroParseErrorTracker(string_to_parse)
-        chomp_result = self._chomper.chomp(string_to_parse, 0, tracker)
-        if chomp_result is None:
-            if self._chomper.quiet():
-                return None
-            raise tracker.retrieve_error()
-        value, index = chomp_result
-        if index < len(string_to_parse):
-            if self._chomper.quiet():
-                return None
+        tracker = chompers.abstract.FroParseErrorTracker()
+        state = chompers.state.ChompState(iters.Stream(lines))
+        success = True
+        try:
+            value = self._chomper.chomp(state, tracker)
+        except chompers.chomp_error.ChompError as e:
+            tracker.report_error(e)
+            success = False
+        success = success and state.at_end()
+        if not success:
             error = tracker.retrieve_error()
             if error is not None:
-                raise error
-            msg = "Unexpected character {}".format(string_to_parse[index:index+1])
-            msg_obj = parse_error.FroParseError.Message(msg)
-            raise parse_error.FroParseError(string_to_parse, [msg_obj], index, index + 1)
-        elif index > len(string_to_parse):
-            raise AssertionError("Invalid index")  # should never happen
+                return self._raise(error)
+            curr = state.current()
+            col = state.column()
+            msg = "Unexpected character {}".format(curr[col])
+            return self._raise(parse_error.FroParseError(
+                [chompers.chomp_error.ChompError(msg, state.location())]))
         return value
+
+    def parse_str(self, string_to_parse):
+        return self.parse([string_to_parse])
 
     def name(self, name):
         """
@@ -122,3 +125,10 @@ class FroParser(object):
             fertile=self._chomper.fertile(),
             name=self._chomper.name(),
             quiet=self._chomper.quiet()))
+
+    # internals
+
+    def _raise(self, err):
+        if self._chomper.quiet():
+            return None
+        raise err
