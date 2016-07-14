@@ -40,9 +40,9 @@ class ErrorTests(unittest.TestCase):
             self.assertParseErrorAttributes(
                 parser,
                 modified_s,
+                message="i={0}, s={1}".format(i, modified_s),
                 column=i,
                 line=0,
-                message="i={0}, s={1}".format(i, modified_s),
                 names=names)
 
     def test_nested1(self):
@@ -63,8 +63,24 @@ class ErrorTests(unittest.TestCase):
             self.assertParseErrorAttributes(
                 floatsp,
                 s,
+                message="s={0}".format(s),
+                line=0)
+
+    def test_tie1(self):
+        def _func(parser):
+            return fro.comp([r"a", parser.maybe(0).name("maybe")]) >> (lambda _, y: y + 1)
+        parser = fro.tie(_func, name="knot")
+        for i in range(0, 10):
+            s = "a" * i + "b"
+            self.assertParseErrorAttributes(
+                parser,
+                s,
+                message="s={0}".format(s),
                 line=0,
-                message="s={0}".format(s))
+                column=i,
+                names=["knot"])
+
+
 
     def assertParseErrorAttributes(self, parser, string, message=None, **kwargs):
         """

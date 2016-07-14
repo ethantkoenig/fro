@@ -75,6 +75,16 @@ def seq(parser_value, reducer=list, sep=None, name=None):
     return parser.FroParser(chompers.sequence.SequenceChomper(
         _extract(parser_value), reducer, _extract(sep), name=name))
 
+
+def tie(func, name=None):
+    stub_chomper = chompers.util.StubChomper(name=name)
+    stub_parser = parser.FroParser(stub_chomper)
+    result = func(stub_parser)
+    stub_chomper.set_delegate(result._chomper)
+    if name is not None:
+        result = result.name(name)
+    return result
+
 # nothing before decimal or something before decimal
 _floatp = r"(-?\.[0-9]+)|(-?[0-9]+(\.[0-9]*)?)"
 floatp = (rgx(r"{}(e[-+]?[0-9]+)?".format(_floatp)) | float).name("float")

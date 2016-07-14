@@ -101,7 +101,7 @@ class AbstractChomper(object):
         :param tracker: FroParseErrorTracker - tracks encountered errors
         :return: tuple (value parsed, first "unconsumed" index)
         """
-        return None  # must be implemented by subclasses
+        raise NotImplementedError  # must be implemented by subclasses
 
     @staticmethod
     def _failed_lookahead(state, tracker):

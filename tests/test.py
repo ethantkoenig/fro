@@ -112,6 +112,22 @@ class FroTests(unittest.TestCase):
         actual = num_seq.parse_str(",8,8")
         self.assertIsNone(actual)
 
+    def test_tie1(self):
+        def _func(parser):
+            return fro.comp([r"~\(", parser.maybe(0), r"~\)"]) >>  (lambda x: x + 1)
+        parser = fro.tie(_func, name="knot")
+        actual = parser.parse_str("((()))")
+        self.assertEqual(actual, 3)
+
+    def test_tie2(self):
+        def _func(parser):
+            return fro.comp([r"~a", fro.seq(parser), r"~b"]).get()
+
+        parser = fro.tie(_func, name="knot")
+        actual = parser.parse_str("aababb")
+        self.assertEqual(actual, [[], []])
+
+
     # tests for parser methods
 
     def test_lstrip1(self):

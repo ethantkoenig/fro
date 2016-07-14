@@ -25,10 +25,15 @@ class FroParseError(Exception):
         if self._filename is not None:
             first_line += " of " + self._filename
 
-        return "\n".join([
+        result = "\n".join([
             first_line,
             "\n".join(str(x) for x in self._messages),
             self.context()])
+
+        if self._cause is not None:
+            result += "\n\nCaused by: " + str(self._cause)
+
+        return result
 
     def cause(self):
         return self._cause
@@ -36,7 +41,7 @@ class FroParseError(Exception):
     def context(self):
         return pretty_printing.printable_string_index_with_context(
                 self._location.text(),
-                self.line(0))
+                self.column(0))
 
     def column(self, index_from=1):
         return self._location.column() + index_from

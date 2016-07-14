@@ -1,7 +1,7 @@
 import re
 
 from fro._implementation import iters, parse_error
-from fro._implementation.chompers import abstract, chomp_error
+from fro._implementation.chompers import abstract, chomp_error, regex
 
 
 class NestedChomper(abstract.AbstractChomper):
@@ -13,11 +13,7 @@ class NestedChomper(abstract.AbstractChomper):
         self._reducer = reducer
 
     def _chomp(self, state, tracker):
-        curr = state.current()
-        col = state.column()
-        match = self._open_regex.match(curr, col)
-        if match is None:
-            return None
+        match = regex.regex_chomp(self._open_regex, state, tracker)
         close_regex = self._close_regex_func(match.group())
         err = self._err(
             self._open_regex.pattern,

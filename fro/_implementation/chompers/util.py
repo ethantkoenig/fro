@@ -37,9 +37,27 @@ class OptionalChomper(abstract.AbstractChomper):
         line = state.line()
         col = state.column()
         try:
-            return self._child.chomp(state, tracker)
+            result = self._child.chomp(state, tracker)
+            return result
         except chomp_error.ChompError as e:
             if state.line() != line:
                 self._failed_lookahead(state, tracker)
+            tracker.report_error(e)
         state.reset_to(col)
         return self._default
+
+
+class StubChomper(abstract.AbstractChomper):
+    def __init__(self, fertile=True, name=None, quiet=False):
+        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
+        self._delegate = None
+
+    def set_delegate(self, delegate):
+        if self._delegate is not None:
+            raise AssertionError("cannot set a stub's delegate twice")
+        self._delegate = delegate
+
+    def _chomp(self, state, tracker):
+        if self._delegate is None:
+            raise ValueError("Stub chomper has no delegate")
+        return self._delegate._chomp(state, tracker)
