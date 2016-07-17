@@ -28,25 +28,30 @@ class SequenceIterable(object):
         self._failed_lookahead = chomper._failed_lookahead
 
     def __iter__(self):
-        rollback_line = self._state.line()
-        rollback_col = self._state.column()
+        state = self._state
+        element = self._element
+        tracker = self._tracker
+        sep = self._sep
+
+        rollback_line = state.line()
+        rollback_col = state.column()
         while True:
             try:
-                yield self._element.chomp(self._state, self._tracker)
-                rollback_line = self._state.line()
-                rollback_col = self._state.column()
+                yield element.chomp(state, tracker)
+                rollback_line = state.line()
+                rollback_col = state.column()
             except chomp_error.ChompError as e:
-                if self._state.line() != rollback_line:
-                    self._failed_lookahead(self._state, self._tracker)
-                self._tracker.report_error(e)
-                self._state.reset_to(rollback_col)
+                if state.line() != rollback_line:
+                    self._failed_lookahead(state, tracker)
+                tracker.report_error(e)
+                state.reset_to(rollback_col)
                 return
 
-            if self._sep is not None:
+            if sep is not None:
                 try:
-                    self._sep.chomp(self._state, self._tracker)
+                    sep.chomp(state, tracker)
                 except chomp_error.ChompError as e:
-                    if self._state.line() != rollback_line:
-                        self._tracker.urgent()
-                    self._tracker.report_error(e)
+                    if state.line() != rollback_line:
+                        tracker.urgent()
+                    tracker.report_error(e)
                     return

@@ -14,32 +14,32 @@ class ChompState(object):
         self._column = column
 
         if self._lines.index() == -1 and self._lines.has_next():
-            next(self._lines)
+            self._curr = next(self._lines)
 
     def advance_to(self, column):
         self._assert_valid_col(column)
         if column < self._column:
             msg = "Cannot advance column from {0} to {1}".format(self._column, column)
             raise ValueError(msg)
-        while column == len(self._lines.current()) and self._lines.has_next():
-            next(self._lines)
+        while column == len(self._curr) and self._lines.has_next():
+            self._curr = next(self._lines)
             column = 0  # "recurse" onto start of next line
         self._column = column
 
     def at_end(self):
-        return self._column == len(self._lines.current()) and not self._lines.has_next()
+        return self._column == len(self._curr) and not self._lines.has_next()
 
     def column(self):
         return self._column
 
     def current(self):
-        return self._lines.current()
+        return self._curr
 
     def line(self):
         return self._lines.index()
 
     def location(self):
-        return Location(self.line(), self.column(), self.current())
+        return Location(self._lines.index(), self._column, self._curr)
 
     def reset_to(self, column):
         self._assert_valid_col(column)
