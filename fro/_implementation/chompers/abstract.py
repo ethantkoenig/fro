@@ -59,15 +59,15 @@ class AbstractChomper(object):
         :return: (t, index) : value parsed, and first "unconsumed" index
         """
         # does some common bookkeeping, then delegates to specialized _chomp
-        if self._name is not None:
-            tracker.offer_name(self._name)
-        try:
-            value = self._chomp(state, tracker)
-            self._last_parsed = value
-            return value
-        finally:
-            if self._name is not None:
-                tracker.revoke_name(self._name)
+        name = self._name
+        if name is not None:
+            tracker.offer_name(name)
+        box = self._chomp(state, tracker)
+        if box is not None:
+            self._last_parsed = box.value
+        if name is not None:
+            tracker.revoke_name(name)
+        return box
 
     # internals
     @staticmethod

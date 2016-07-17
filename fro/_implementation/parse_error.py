@@ -6,13 +6,6 @@ class FroParseError(Exception):
     An exception for parsing failures
     """
     def __init__(self, chomp_errors, cause=None, filename=None):
-        """
-        :param string: string being parsed
-        :param messages: non-empty list of Message objects
-        :param start_index: beginning index of substring causing error
-        :param end_index: end index of substring causing error
-        :param cause: Exception that triggered this exception
-        """
         self._messages = [_message_of_chomp_error(ce) for ce in chomp_errors]
         self._location = chomp_errors[0].location()
         self._cause = cause

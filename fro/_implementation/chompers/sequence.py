@@ -1,6 +1,6 @@
 from fro._implementation import iters
-from fro._implementation.chompers import abstract, chomp_error
-
+from fro._implementation.chompers import abstract
+from fro._implementation.chompers.box import Box
 
 class SequenceChomper(abstract.AbstractChomper):
 
@@ -16,7 +16,7 @@ class SequenceChomper(abstract.AbstractChomper):
         iterator = iter(iterable)
         value = self._reducer(iterator)
         iters.close(iterator)
-        return value
+        return Box(value)
 
 
 class SequenceIterable(object):
@@ -36,22 +36,20 @@ class SequenceIterable(object):
         rollback_line = state.line()
         rollback_col = state.column()
         while True:
-            try:
-                yield element.chomp(state, tracker)
-                rollback_line = state.line()
-                rollback_col = state.column()
-            except chomp_error.ChompError as e:
+            box = element.chomp(state, tracker)
+            if box is None:
                 if state.line() != rollback_line:
                     self._failed_lookahead(state, tracker)
-                tracker.report_error(e)
                 state.reset_to(rollback_col)
                 return
+            yield box.value
+            rollback_line = state.line()
+            rollback_col = state.column()
 
             if sep is not None:
-                try:
-                    sep.chomp(state, tracker)
-                except chomp_error.ChompError as e:
+                box_ = sep.chomp(state, tracker)
+                if box_ is None:
                     if state.line() != rollback_line:
-                        tracker.urgent()
-                    tracker.report_error(e)
+                        self._failed_lookahead(state, tracker)
+                    state.reset_to(rollback_col)
                     return

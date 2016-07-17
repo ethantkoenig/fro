@@ -2,7 +2,7 @@ import re
 
 from fro._implementation.chompers.abstract import AbstractChomper
 from fro._implementation.chompers.chomp_error import ChompError
-
+from fro._implementation.chompers.box import Box
 
 class GroupRegexChomper(AbstractChomper):
 
@@ -12,8 +12,10 @@ class GroupRegexChomper(AbstractChomper):
 
     def _chomp(self, state, tracker):
         match = regex_chomp(self._regex, state, tracker)
+        if match is None:
+            return None
         state.advance_to(match.end())
-        return match.groups()
+        return Box(match.groups())
 
 
 class RegexChomper(AbstractChomper):
@@ -26,10 +28,12 @@ class RegexChomper(AbstractChomper):
         col = state.column()
         line = state.current()
         match = regex_chomp(self._regex, state, tracker)
+        if match is None:
+            return None
         start_index = col
         end_index = match.end()
         state.advance_to(end_index)
-        return line[start_index:end_index]
+        return Box(line[start_index:end_index])
 
 
 def regex_chomp(regex, state, tracker):
@@ -44,5 +48,6 @@ def regex_chomp(regex, state, tracker):
     match = regex.match(line, index)
     if match is None:
         msg = "Expected pattern \'{}\'".format(regex.pattern)
-        raise ChompError(msg, state.location(), tracker.current_name())
+        chomp_err = ChompError(msg, state.location(), tracker.current_name())
+        tracker.report_error(chomp_err)
     return match

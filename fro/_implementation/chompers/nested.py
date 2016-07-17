@@ -2,7 +2,7 @@ import re
 
 from fro._implementation import iters, parse_error
 from fro._implementation.chompers import abstract, chomp_error, regex
-
+from fro._implementation.chompers.box import Box
 
 class NestedChomper(abstract.AbstractChomper):
     def __init__(self, open_regex_string, close_regex_func, reducer,
@@ -14,6 +14,8 @@ class NestedChomper(abstract.AbstractChomper):
 
     def _chomp(self, state, tracker):
         match = regex.regex_chomp(self._open_regex, state, tracker)
+        if match is None:
+            return None
         close_regex = self._close_regex_func(match.group())
         err = self._err(
             self._open_regex.pattern,
@@ -26,7 +28,7 @@ class NestedChomper(abstract.AbstractChomper):
         iterator = iter(iterable)
         value = self._apply(tracker, state, self._reducer, iterator)
         iters.close(iterator)
-        return value
+        return Box(value)
 
     @staticmethod
     def _err(open_str, close_str, location, name):

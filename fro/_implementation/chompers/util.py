@@ -1,5 +1,5 @@
-from fro._implementation.chompers import abstract, chomp_error
-
+from fro._implementation.chompers import abstract
+from fro._implementation.chompers.box import Box
 
 class DelegateChomper(abstract.AbstractChomper):
     def __init__(self, delegate, fertile=True, name=None):
@@ -44,8 +44,11 @@ class MapChomper(abstract.AbstractChomper):
         self._func = func
 
     def _chomp(self, state, tracker):
-        value = self._parser.chomp(state, tracker)
-        return abstract.AbstractChomper._apply(tracker, state, self._func, value)
+        box = self._parser.chomp(state, tracker)
+        if box is None:
+            return None
+        box.value = abstract.AbstractChomper._apply(tracker, state, self._func, box.value)
+        return box
 
 
 class OptionalChomper(abstract.AbstractChomper):
@@ -57,15 +60,13 @@ class OptionalChomper(abstract.AbstractChomper):
     def _chomp(self, state, tracker):
         line = state.line()
         col = state.column()
-        try:
-            result = self._child.chomp(state, tracker)
-            return result
-        except chomp_error.ChompError as e:
-            if state.line() != line:
-                self._failed_lookahead(state, tracker)
-            tracker.report_error(e)
+        box = self._child.chomp(state, tracker)
+        if box is not None:
+            return box
+        elif state.line() != line:
+            self._failed_lookahead(state, tracker)
         state.reset_to(col)
-        return self._default
+        return Box(self._default)
 
 
 class StubChomper(abstract.AbstractChomper):

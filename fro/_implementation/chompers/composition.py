@@ -10,10 +10,18 @@ class CompositionChomper(AbstractChomper):
 
     def _chomp(self, state, tracker):
         values = []
+        length = len(self._parsers)
         for i, parser in enumerate(self._parsers):
-            value = parser.chomp(state, tracker)
+            box_ = parser.chomp(state, tracker)
+            if box_ is None:
+                return None
             if parser._fertile:
-                values.append(value)
-            if i < len(self._parsers) - 1 and self._separator is not None:
-                self._separator.chomp(state, tracker)
-        return tuple(values)
+                values.append(box_.value)
+            if i == length - 1:
+                box_.value = tuple(values)
+                return box_
+            elif self._separator is not None:
+                box_ = self._separator.chomp(state, tracker)
+                if box_ is not None:
+                    return None
+        raise AssertionError()

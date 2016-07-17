@@ -23,14 +23,12 @@ class FroParser(object):
         """
         tracker = chompers.abstract.FroParseErrorTracker()
         state = chompers.state.ChompState(iters.Stream(lines))
-        try:
-            value = self._chomper.chomp(state, tracker)
-        except chompers.chomp_error.ChompError as e:
-            tracker.report_error(e)
-            return self._failed_parse(state, tracker)
-        if not state.at_end():
-            return self._failed_parse(state, tracker)
-        return value
+        box = self._chomper.chomp(state, tracker)
+        if box is None:
+            return self._failed_parse(state, tracker, False)
+        elif not state.at_end():
+            return self._failed_parse(state, tracker, True)
+        return box.value
 
     def parse_str(self, string_to_parse):
         return self.parse([string_to_parse])
@@ -125,19 +123,20 @@ class FroParser(object):
 
     # internals
 
-    def _failed_parse(self, state, tracker):
-        error = tracker.retrieve_error()
-        if error is not None:
-            return self._raise(error)
-        curr = state.current()
-        col = state.column()
-        msg = "Unexpected character {}".format(curr[col])
-        return self._raise(parse_error.FroParseError(
-            [chompers.chomp_error.ChompError(msg, state.location())]))
+    def _failed_parse(self, state, tracker, valid_value):
+        if valid_value:
+            curr = state.current()
+            col = state.column()
+            msg = "Unexpected character {}".format(curr[col])
+            chomp_err = chompers.chomp_error.ChompError(msg, state.location())
+            tracker.report_error(chomp_err)
+        return self._raise(tracker.retrieve_error())
 
     def _raise(self, err):
         if self._quiet:
             return None
+        if err is None:
+            raise AssertionError()
         raise err
 
 
