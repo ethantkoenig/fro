@@ -37,7 +37,7 @@ class SequenceIterable(object):
                 rollback_col = self._state.column()
             except chomp_error.ChompError as e:
                 if self._state.line() != rollback_line:
-                    self._failed_lookahead()
+                    self._failed_lookahead(self._state, self._tracker)
                 self._tracker.report_error(e)
                 self._state.reset_to(rollback_col)
                 return

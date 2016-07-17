@@ -2,9 +2,6 @@ from fro._implementation.chompers import abstract, chomp_error
 
 
 class DelegateChomper(abstract.AbstractChomper):
-    """
-    Fro parser that delegates parsing to another parser
-    """
     def __init__(self, delegate, fertile=True, name=None):
         abstract.AbstractChomper.__init__(self, fertile, name)
         self._delegate = delegate
@@ -14,15 +11,27 @@ class DelegateChomper(abstract.AbstractChomper):
 
 
 class DependentChomper(abstract.AbstractChomper):
-
-    def __init__(self, dependee, chomper_func, name=None, fertile=True):
-        abstract.AbstractChomper.__init__(self, name=name, fertile=fertile)
+    def __init__(self, dependee, chomper_func, fertile=True, name=None):
+        abstract.AbstractChomper.__init__(self, fertile=fertile, name=name)
         self._dependee = dependee
         self._chomper_func = chomper_func
 
     def _chomp(self, state, tracker):
         chomper = self._chomper_func(self._dependee.last_parsed())
         return chomper.chomp(state, tracker)
+
+
+class LazyChomper(abstract.AbstractChomper):
+    def __init__(self, func, fertile=True, name=None):
+        abstract.AbstractChomper.__init__(self, fertile=fertile, name=name)
+        self._func = func
+        self._chomper = None
+
+    def _chomp(self, state, tracker):
+        if self._chomper is None:
+            lazier = LazyChomper(self._func, fertile=self._fertile, name=self._name)
+            self._chomper = self._func(lazier)
+        return self._chomper.chomp(state, tracker)
 
 
 class MapChomper(abstract.AbstractChomper):
@@ -66,10 +75,10 @@ class StubChomper(abstract.AbstractChomper):
 
     def set_delegate(self, delegate):
         if self._delegate is not None:
-            raise AssertionError("cannot set a stub's delegate twice")
+            raise AssertionError("Cannot set a stub's delegate twice")
         self._delegate = delegate
 
     def _chomp(self, state, tracker):
         if self._delegate is None:
             raise ValueError("Stub chomper has no delegate")
-        return self._delegate._chomp(state, tracker)
+        return self._delegate.chomp(state, tracker)

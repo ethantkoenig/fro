@@ -178,6 +178,12 @@ def alt(parser_values, name=None):
         chompers_, name=name))
 
 
+def chain(func, name=None):
+    def func_(chomper):
+        return _extract(func(FroParser(chomper)))
+    return FroParser(chompers.util.LazyChomper(func_, name=name))
+
+
 def comp(parser_values, sep=None, name=None):
     if isinstance(parser_values, str) or isinstance(parser_values, bytes):
         raise TypeError("Do not pass a string/bytes for the parser_values argument")

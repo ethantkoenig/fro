@@ -106,7 +106,8 @@ class AbstractChomper(object):
     @staticmethod
     def _failed_lookahead(state, tracker):
         msg = "Failed lookahead during parse"
-        AbstractChomper._urgent(ChompError(msg, state.location, tracker.current_name))
+        AbstractChomper._urgent(ChompError(
+            msg, state.location(), tracker.current_name()))
 
     @staticmethod
     def _log_error(chomp_error, tracker):

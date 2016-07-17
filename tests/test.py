@@ -24,6 +24,28 @@ class FroTests(unittest.TestCase):
         self.assertEqual(parser.parse_str("9876"), None)
         self.assertEqual(parser.parse_str("234t"), None)
 
+    def test_chain1(self):
+        def func(parser):
+            return fro.comp([r"~a", fro.seq(parser), r"~b"]) >> (lambda x: 1 + sum(x))
+        chained = fro.chain(func)
+        self.assertEqual(chained.parse("aababb"), 3)
+
+    def test_chain2(self):
+        def func(parser):
+            open = fro.rgx("[a-z]+")
+            close = open.dependent(lambda s: re.escape(s.upper()))
+            children = fro.seq(parser) | (lambda l: 1 + sum(l))
+            return fro.comp([-open, children, -close]).get()
+        chained = fro.chain(func)
+        l = ["abc", "efg", "EFG", "q", "Q", "ABC"]
+        self.assertEqual(chained.parse(l), 3)
+        l_ = [chr(i) for i in range(97, 123)]
+        l = l_ + list(reversed([x.upper() for x in l_]))
+        self.assertEqual(chained.parse(l), 26)
+        l = ["abc", "def", "DEF", "DEF"]
+        self.assertRaises(fro.FroParseError, chained.parse, l)
+
+
     def test_compose1(self):
         rgxs = [fro.rgx(str(n)) | int for n in range(100)]
         rgxs = [++rgx if i % 2 == 0 else --rgx for i, rgx in enumerate(rgxs)]
