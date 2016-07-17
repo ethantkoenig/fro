@@ -3,8 +3,8 @@ from fro._implementation.chompers.abstract import AbstractChomper
 
 class CompositionChomper(AbstractChomper):
 
-    def __init__(self, parsers, separator=None, fertile=True, name=None, quiet=False):
-        AbstractChomper.__init__(self, fertile, name, quiet)
+    def __init__(self, parsers, separator=None, fertile=True, name=None):
+        AbstractChomper.__init__(self, fertile, name)
         self._parsers = list(parsers)
         self._separator = separator  # self._separator may be None
 

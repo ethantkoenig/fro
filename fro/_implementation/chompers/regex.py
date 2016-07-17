@@ -6,8 +6,8 @@ from fro._implementation.chompers.chomp_error import ChompError
 
 class GroupRegexChomper(AbstractChomper):
 
-    def __init__(self, regex_str, fertile=True, name=None, quiet=False):
-        AbstractChomper.__init__(self, fertile, name, quiet)
+    def __init__(self, regex_str, fertile=True, name=None):
+        AbstractChomper.__init__(self, fertile, name)
         self._regex = re.compile(regex_str)
 
     def _chomp(self, state, tracker):
@@ -18,8 +18,8 @@ class GroupRegexChomper(AbstractChomper):
 
 class RegexChomper(AbstractChomper):
 
-    def __init__(self, regex_string, fertile=True, name=None, quiet=False):
-        AbstractChomper.__init__(self, fertile, name, quiet)
+    def __init__(self, regex_string, fertile=True, name=None):
+        AbstractChomper.__init__(self, fertile, name)
         self._regex = re.compile(regex_string)
 
     def _chomp(self, state, tracker):

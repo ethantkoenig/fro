@@ -2,8 +2,8 @@ from fro._implementation.chompers import abstract, chomp_error
 
 
 class AlternationChomper(abstract.AbstractChomper):
-    def __init__(self, chompers, fertile=True, name=None, quiet=False):
-        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
+    def __init__(self, chompers, fertile=True, name=None):
+        abstract.AbstractChomper.__init__(self, fertile, name)
         self._chompers = list(chompers)
 
     def _chomp(self, state, tracker):

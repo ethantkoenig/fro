@@ -5,8 +5,8 @@ class DelegateChomper(abstract.AbstractChomper):
     """
     Fro parser that delegates parsing to another parser
     """
-    def __init__(self, delegate, fertile=True, name=None, quiet=False):
-        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
+    def __init__(self, delegate, fertile=True, name=None):
+        abstract.AbstractChomper.__init__(self, fertile, name)
         self._delegate = delegate
 
     def _chomp(self, state, tracker):
@@ -17,8 +17,8 @@ class MapChomper(abstract.AbstractChomper):
     """
     Fro parser that performs map operation on parsed values
     """
-    def __init__(self, parser, func, fertile=True, name=None, quiet=False):
-        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
+    def __init__(self, parser, func, fertile=True, name=None):
+        abstract.AbstractChomper.__init__(self, fertile, name)
         self._parser = parser
         self._func = func
 
@@ -28,8 +28,8 @@ class MapChomper(abstract.AbstractChomper):
 
 
 class OptionalChomper(abstract.AbstractChomper):
-    def __init__(self, child, default=None, fertile=True, name=None, quiet=False):
-        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
+    def __init__(self, child, default=None, fertile=True, name=None):
+        abstract.AbstractChomper.__init__(self, fertile, name)
         self._child = child
         self._default = default
 
@@ -48,8 +48,8 @@ class OptionalChomper(abstract.AbstractChomper):
 
 
 class StubChomper(abstract.AbstractChomper):
-    def __init__(self, fertile=True, name=None, quiet=False):
-        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
+    def __init__(self, fertile=True, name=None):
+        abstract.AbstractChomper.__init__(self, fertile, name)
         self._delegate = None
 
     def set_delegate(self, delegate):

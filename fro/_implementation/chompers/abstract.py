@@ -14,15 +14,13 @@ class AbstractChomper(object):
     performed on a chomper could alter a shallow copy.
     """
 
-    def __init__(self, fertile=True, name=None, quiet=False):
+    def __init__(self, fertile=True, name=None):
         """
-        :param fertile: if the parser produces a meaningful value
-        :param name: name of parser, for error messages
-        :param quiet: if the parser should be "quiet" (not raise errors on parsing failures)
+        :param fertile: if the chomper produces a meaningful value
+        :param name: name of chomper, for error messages
         """
         self._fertile = fertile
         self._name = name
-        self._quiet = quiet
 
     def fertile(self):
         return self._fertile
@@ -30,20 +28,15 @@ class AbstractChomper(object):
     def name(self):
         return self._name
 
-    def quiet(self):
-        return self._quiet
-
-    def clone(self, fertile=None, name=None, quiet=None):
+    def clone(self, fertile=None, name=None):
         """
         :return: a chomper identical to self, except with the specified values
         """
         fertile = fertile if fertile is not None else self._fertile
         name = name if name is not None else self._name
-        quiet = quiet if quiet is not None else self._quiet
         carbon = copy.copy(self)
         carbon._fertile = fertile
         carbon._name = name
-        carbon._quiet = quiet
         return carbon
 
     def unname(self):

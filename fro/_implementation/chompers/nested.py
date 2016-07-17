@@ -6,8 +6,8 @@ from fro._implementation.chompers import abstract, chomp_error, regex
 
 class NestedChomper(abstract.AbstractChomper):
     def __init__(self, open_regex_string, close_regex_func, reducer,
-                 fertile=True, name=None, quiet=False):
-        abstract.AbstractChomper.__init__(self, fertile, name, quiet)
+                 fertile=True, name=None):
+        abstract.AbstractChomper.__init__(self, fertile, name)
         self._open_regex = re.compile(open_regex_string)
         self._close_regex_func = close_regex_func
         self._reducer = reducer
