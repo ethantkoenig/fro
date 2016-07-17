@@ -106,6 +106,12 @@ class FroTests(unittest.TestCase):
                 expected = None
             self.assertEqual(actual, expected)
 
+    def test_seq3(self):
+        sq = fro.seq(r"[a-z]+\n")
+        lines = ["asdfj\n", "q\n", "adsjfa\n"]
+        actual = sq.parse(lines)
+        self.assertEqual(actual, lines)
+
     def test_seq_empty(self):
         num = fro.rgx(r"[0-9]+", "natural number")
         num_seq = fro.seq(num, sep=r",").quiet()
