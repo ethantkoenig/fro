@@ -160,7 +160,7 @@ def _extract(value):
 
 def _parse_rgx(regex_string):
     """
-    :return: (modified regex_string, whether fertile)
+    :return: a tuple of (modified regex_string, whether fertile)
     """
     if regex_string[0:1] == r"~":
         return regex_string[1:], False
