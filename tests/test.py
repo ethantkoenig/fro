@@ -1,5 +1,6 @@
 # coding=utf-8
 import random
+import re
 import unittest
 
 import fro
@@ -133,8 +134,34 @@ class FroTests(unittest.TestCase):
         actual = parser.parse_str("aababb")
         self.assertEqual(actual, [[], []])
 
-
     # tests for parser methods
+
+    def test_dependent1(self):
+        p1 = fro.rgx(r"[abc]+!")
+        parser = fro.comp([p1, p1.dependent(lambda s: s)]) | "".join
+        s = "acc!acc!"
+        self.assertEqual(parser.parse_str(s), s)
+
+    def test_dependent2(self):
+        p1 = fro.rgx(r"[abc]+!")
+        parser = fro.comp([p1, p1.dependent(lambda s: s)]) | "".join
+        self.assertRaises(fro.FroParseError, parser.parse_str, "cb!aa!")
+
+    def test_dependent3(self):
+        p1 = fro.rgx(r"[a-z]+")
+
+        def _parser(string):
+            if len(string) > 0 and string[0] == "a":
+                return fro.rgx(r"TheFirstOneStartsWithA")
+            elif len(string) < 3:
+                return p1
+            return re.escape(string)
+
+        parser = fro.comp([p1, r"~,", p1.dependent(_parser)]) | (lambda _: 0)
+        self.assertEqual(parser.parse_str("ui,ou"), 0)
+        self.assertEqual(parser.parse_str("asdf,TheFirstOneStartsWithA"), 0)
+        self.assertEqual(parser.parse_str("qwerty,qwerty"), 0)
+        self.assertRaises(fro.FroParseError, parser.parse_str, "hello,goodbye")
 
     def test_lstrip1(self):
         parser = fro.intp.lstrip()

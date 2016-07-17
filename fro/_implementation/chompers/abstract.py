@@ -22,8 +22,13 @@ class AbstractChomper(object):
         self._fertile = fertile
         self._name = name
 
+        self._last_parsed = None
+
     def fertile(self):
         return self._fertile
+
+    def last_parsed(self):
+        return self._last_parsed
 
     def name(self):
         return self._name
@@ -57,7 +62,9 @@ class AbstractChomper(object):
         if self._name is not None:
             tracker.offer_name(self._name)
         try:
-            return self._chomp(state, tracker)
+            value = self._chomp(state, tracker)
+            self._last_parsed = value
+            return value
         finally:
             if self._name is not None:
                 tracker.revoke_name(self._name)

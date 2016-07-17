@@ -13,6 +13,18 @@ class DelegateChomper(abstract.AbstractChomper):
         return self._delegate.chomp(state, tracker)
 
 
+class DependentChomper(abstract.AbstractChomper):
+
+    def __init__(self, dependee, chomper_func, name=None, fertile=True):
+        abstract.AbstractChomper.__init__(self, name=name, fertile=fertile)
+        self._dependee = dependee
+        self._chomper_func = chomper_func
+
+    def _chomp(self, state, tracker):
+        chomper = self._chomper_func(self._dependee.last_parsed())
+        return chomper.chomp(state, tracker)
+
+
 class MapChomper(abstract.AbstractChomper):
     """
     Fro parser that performs map operation on parsed values

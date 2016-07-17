@@ -81,6 +81,12 @@ class FroParser(object):
     def get(self):
         return self >> (lambda x: x)
 
+    def dependent(self, func, name=None):
+        return FroParser(chompers.util.DependentChomper(
+            self._chomper,
+            lambda x: _extract(func(x)),
+            name=name))
+
     def __neg__(self):
         """
         :return: an infertile copy of the called parser
