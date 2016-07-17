@@ -46,6 +46,8 @@ def alt(parser_values, name=None):
 
 
 def comp(parser_values, sep=None, name=None):
+    if isinstance(parser_values, str) or isinstance(parser_values, bytes):
+        raise TypeError("Do not pass a string/bytes for the parser_values argument")
     chompers_ = [_extract(p) for p in parser_values]
     return parser.FroParser(chompers.composition.CompositionChomper(
         chompers_, sep, name=name))
