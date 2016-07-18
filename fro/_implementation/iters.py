@@ -56,8 +56,4 @@ class Stream(object):
 
 
 def close(iterator):
-    try:
-        while True:
-            next(iterator)
-    except StopIteration:
-        pass
+    sum(0 for _ in iterator)

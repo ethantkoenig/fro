@@ -17,10 +17,10 @@ class ChompState(object):
             self._curr = next(self._lines)
 
     def advance_to(self, column):
-        self._assert_valid_col(column)
-        if column < self._column:
-            msg = "Cannot advance column from {0} to {1}".format(self._column, column)
-            raise ValueError(msg)
+        #self._assert_valid_col(column)
+        #if column < self._column:
+        #    msg = "Cannot advance column from {0} to {1}".format(self._column, column)
+        #    raise ValueError(msg)
         while column == len(self._curr) and self._lines.has_next():
             self._curr = next(self._lines)
             column = 0  # "recurse" onto start of next line
@@ -42,16 +42,16 @@ class ChompState(object):
         return Location(self._lines.index(), self._column, self._curr)
 
     def reset_to(self, column):
-        self._assert_valid_col(column)
-        if column > self._column:
-            msg = "Cannot reset column from {0} to {1}".format(self._column, column)
-            raise ValueError(msg)
+        #self._assert_valid_col(column)
+        #if column > self._column:
+        #    msg = "Cannot reset column from {0} to {1}".format(self._column, column)
+        #    raise ValueError(msg)
         self._column = column
 
-    def _assert_valid_col(self, column):
-        if column < 0:
-            raise ValueError("column ({0}) must be non-negative".format(column))
-        elif column > len(self._lines.current()):
-            msg = "column ({0}) is greater than line length ({1})".format(
-                column, len(self._lines.current()))
-            raise ValueError(msg)
+    # def _assert_valid_col(self, column):
+    #     if column < 0:
+    #         raise ValueError("column ({0}) must be non-negative".format(column))
+    #     elif column > len(self._lines.current()):
+    #         msg = "column ({0}) is greater than line length ({1})".format(
+    #             column, len(self._lines.current()))
+    #         raise ValueError(msg)
