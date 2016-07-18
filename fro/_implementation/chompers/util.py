@@ -2,15 +2,6 @@ from fro._implementation.chompers import abstract
 from fro._implementation.chompers.box import Box
 
 
-class DelegateChomper(abstract.AbstractChomper):
-    def __init__(self, delegate, fertile=True, name=None):
-        abstract.AbstractChomper.__init__(self, fertile, name)
-        self._delegate = delegate
-
-    def _chomp(self, state, tracker):
-        return self._delegate.chomp(state, tracker)
-
-
 class DependentChomper(abstract.AbstractChomper):
     def __init__(self, dependee, chomper_func, fertile=True, name=None):
         abstract.AbstractChomper.__init__(self, fertile=fertile, name=name)

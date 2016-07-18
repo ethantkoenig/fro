@@ -32,10 +32,10 @@ class FroTests(unittest.TestCase):
 
     def test_chain2(self):
         def func(parser):
-            open = fro.rgx("[a-z]+")
-            close = open.dependent(lambda s: re.escape(s.upper()))
+            openp = -fro.rgx("[a-z]+")
+            closep = -openp.dependent(lambda s: re.escape(s.upper()))
             children = fro.seq(parser) | (lambda l: 1 + sum(l))
-            return fro.comp([-open, children, -close]).get()
+            return fro.comp([openp, children, closep]).get()
         chained = fro.chain(func)
         l = ["abc", "efg", "EFG", "q", "Q", "ABC"]
         self.assertEqual(chained.parse(l), 3)

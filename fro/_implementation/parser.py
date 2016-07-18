@@ -89,23 +89,13 @@ class FroParser(object):
         """
         :return: an infertile copy of the called parser
         """
-        if not self._chomper.fertile():
-            return self
-        return FroParser(chompers.util.DelegateChomper(
-            self._chomper,
-            fertile=False,
-            name=self._chomper.name()))
+        return FroParser(self._chomper.clone(fertile=False))
 
     def __pos__(self):
         """
         :return: a fertile copy of the called parser
         """
-        if self._chomper.fertile():
-            return self
-        return FroParser(chompers.util.DelegateChomper(
-            self._chomper,
-            fertile=True,
-            name=self._chomper.name()))
+        return FroParser(self._chomper.clone(fertile=True))
 
     def __or__(self, func):
         return FroParser(self._chomper.clone(func=func))
