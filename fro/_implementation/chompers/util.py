@@ -1,6 +1,7 @@
 from fro._implementation.chompers import abstract
 from fro._implementation.chompers.box import Box
 
+
 class DelegateChomper(abstract.AbstractChomper):
     def __init__(self, delegate, fertile=True, name=None):
         abstract.AbstractChomper.__init__(self, fertile, name)
@@ -24,31 +25,14 @@ class DependentChomper(abstract.AbstractChomper):
 class LazyChomper(abstract.AbstractChomper):
     def __init__(self, func, fertile=True, name=None):
         abstract.AbstractChomper.__init__(self, fertile=fertile, name=name)
-        self._func = func
+        self._generation_func = func
         self._chomper = None
 
     def _chomp(self, state, tracker):
         if self._chomper is None:
-            lazier = LazyChomper(self._func, fertile=self._fertile, name=self._name)
-            self._chomper = self._func(lazier)
+            lazier = LazyChomper(self._generation_func, fertile=self._fertile, name=self._name)
+            self._chomper = self._generation_func(lazier)
         return self._chomper.chomp(state, tracker)
-
-
-class MapChomper(abstract.AbstractChomper):
-    """
-    Fro parser that performs map operation on parsed values
-    """
-    def __init__(self, chomper, func, fertile=True, name=None):
-        abstract.AbstractChomper.__init__(self, fertile, name)
-        self._chomper = chomper
-        self._func = func
-
-    def _chomp(self, state, tracker):
-        box = self._chomper.chomp(state, tracker)
-        if box is None:
-            return None
-        box.value = abstract.AbstractChomper._apply(tracker, state, self._func, box.value)
-        return box
 
 
 class OptionalChomper(abstract.AbstractChomper):

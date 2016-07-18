@@ -108,18 +108,10 @@ class FroParser(object):
             name=self._chomper.name()))
 
     def __or__(self, func):
-        return FroParser(chompers.util.MapChomper(
-            self._chomper,
-            func,
-            fertile=self._chomper.fertile(),
-            name=self._chomper.name()))
+        return FroParser(self._chomper.clone(func=func))
 
     def __rshift__(self, func):
-        return FroParser(chompers.util.MapChomper(
-            self._chomper,
-            lambda x: func(*x),
-            fertile=self._chomper.fertile(),
-            name=self._chomper.name()))
+        return FroParser(self._chomper.clone(func=lambda x: func(*x)))
 
     # internals
 

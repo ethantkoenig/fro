@@ -23,6 +23,7 @@ class AbstractChomper(object):
         self._name = name
 
         self._last_parsed = None
+        self._func = None
 
     def fertile(self):
         return self._fertile
@@ -33,15 +34,23 @@ class AbstractChomper(object):
     def name(self):
         return self._name
 
-    def clone(self, fertile=None, name=None):
+    def clone(self, fertile=None, name=None, func=None):
         """
         :return: a chomper identical to self, except with the specified values
         """
         fertile = fertile if fertile is not None else self._fertile
         name = name if name is not None else self._name
+        if func is None:
+            func_ = self._func
+        elif self._func is not None:
+            func_ = lambda *x: func(self._func(*x))
+        else:
+            func_ = func
         carbon = copy.copy(self)
         carbon._fertile = fertile
         carbon._name = name
+        carbon._last_parsed = None
+        carbon._func = func_
         return carbon
 
     def unname(self):
@@ -64,6 +73,8 @@ class AbstractChomper(object):
             tracker.offer_name(name)
         box = self._chomp(state, tracker)
         if box is not None:
+            if self._func is not None:
+                box.value = self._func(box.value)
             self._last_parsed = box.value
         if name is not None:
             tracker.revoke_name()
