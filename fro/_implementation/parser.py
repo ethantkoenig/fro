@@ -225,6 +225,11 @@ def tie(func, name=None):
         result = result.name(name)
     return result
 
+
+def until(regex_str, reducer="".join, name=None):
+    return FroParser(chompers.until.UntilChomper(regex_str, reducer, name=name))
+
+
 # nothing before decimal or something before decimal
 _floatp = r"(-?\.[0-9]+)|(-?[0-9]+(\.[0-9]*)?)"
 floatp = (rgx(r"{}(e[-+]?[0-9]+)?".format(_floatp)) | float).name("float")

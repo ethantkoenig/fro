@@ -156,6 +156,16 @@ class FroTests(unittest.TestCase):
         actual = parser.parse_str("aababb")
         self.assertEqual(actual, [[], []])
 
+    def test_until1(self):
+        lines = ["sdf", "sdf", "a"]
+        parser = fro.comp([fro.until(r"a"), r"a"])
+        self.assertEqual(parser.parse(lines), ("sdfsdf", "a"))
+
+    def test_until2(self):
+        lines = "hello from a far place".split()
+        parser = fro.until(r"zebra") | (lambda _: True)
+        self.assertEqual(parser.parse(lines), True)
+
     # tests for parser methods
 
     def test_dependent1(self):
