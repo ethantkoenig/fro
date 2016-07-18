@@ -66,7 +66,7 @@ class AbstractChomper(object):
         if box is not None:
             self._last_parsed = box.value
         if name is not None:
-            tracker.revoke_name(name)
+            tracker.revoke_name()
         return box
 
     # internals
@@ -141,16 +141,7 @@ class FroParseErrorTracker(object):
     def offer_name(self, name):
         self._names.append(name)
 
-    def revoke_name(self, name):
-        current_name = self.current_name()
-        if current_name is None:
-            msg = "Tracker contains no names, could not revoke name {0}"\
-                .format(name)
-            raise AssertionError(msg)
-        elif name != current_name:
-            msg = "Could not revoke name {0}, current name is {1}"\
-                .format(name, current_name)
-            raise ValueError(msg)
+    def revoke_name(self):
         self._names.pop()
 
     def current_name(self):
