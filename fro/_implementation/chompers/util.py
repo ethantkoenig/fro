@@ -38,13 +38,13 @@ class MapChomper(abstract.AbstractChomper):
     """
     Fro parser that performs map operation on parsed values
     """
-    def __init__(self, parser, func, fertile=True, name=None):
+    def __init__(self, chomper, func, fertile=True, name=None):
         abstract.AbstractChomper.__init__(self, fertile, name)
-        self._parser = parser
+        self._chomper = chomper
         self._func = func
 
     def _chomp(self, state, tracker):
-        box = self._parser.chomp(state, tracker)
+        box = self._chomper.chomp(state, tracker)
         if box is None:
             return None
         box.value = abstract.AbstractChomper._apply(tracker, state, self._func, box.value)
