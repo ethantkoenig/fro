@@ -79,12 +79,6 @@ class FroParser(object):
     def get(self):
         return self >> (lambda x: x)
 
-    def dependent(self, func, name=None):
-        return FroParser(chompers.util.DependentChomper(
-            self._chomper,
-            lambda x: _extract(func(x)),
-            name=name))
-
     def __neg__(self):
         """
         :return: an infertile copy of the called parser
@@ -162,7 +156,7 @@ def alt(parser_values, name=None):
 def chain(func, name=None):
     def func_(chomper):
         return _extract(func(FroParser(chomper)))
-    return FroParser(chompers.util.LazyChomper(func_, name=name))
+    return FroParser(chompers.util.ChainChomper(func_, name=name))
 
 
 def comp(parser_values, sep=None, name=None):
@@ -196,6 +190,11 @@ def rgx(regex_string, name=None):
 def seq(parser_value, reducer=list, sep=None, name=None):
     return FroParser(chompers.sequence.SequenceChomper(
         _extract(parser_value), reducer, _extract(sep), name=name))
+
+
+def thunk(func, name=None):
+    return FroParser(chompers.util.ThunkChomper(
+        lambda: _extract(func()), name=name))
 
 
 def tie(func, name=None):

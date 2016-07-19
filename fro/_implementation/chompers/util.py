@@ -2,18 +2,7 @@ from fro._implementation.chompers import abstract
 from fro._implementation.chompers.box import Box
 
 
-class DependentChomper(abstract.AbstractChomper):
-    def __init__(self, dependee, chomper_func, fertile=True, name=None):
-        abstract.AbstractChomper.__init__(self, fertile=fertile, name=name)
-        self._dependee = dependee
-        self._chomper_func = chomper_func
-
-    def _chomp(self, state, tracker):
-        chomper = self._chomper_func(self._dependee.last_parsed())
-        return chomper.chomp(state, tracker)
-
-
-class LazyChomper(abstract.AbstractChomper):
+class ChainChomper(abstract.AbstractChomper):
     def __init__(self, func, fertile=True, name=None):
         abstract.AbstractChomper.__init__(self, fertile=fertile, name=name)
         self._generation_func = func
@@ -21,7 +10,7 @@ class LazyChomper(abstract.AbstractChomper):
 
     def _chomp(self, state, tracker):
         if self._chomper is None:
-            lazier = LazyChomper(self._generation_func, fertile=self._fertile, name=self._name)
+            lazier = ChainChomper(self._generation_func, fertile=self._fertile, name=self._name)
             self._chomper = self._generation_func(lazier)
         return self._chomper.chomp(state, tracker)
 
@@ -58,3 +47,12 @@ class StubChomper(abstract.AbstractChomper):
         if self._delegate is None:
             raise ValueError("Stub chomper has no delegate")
         return self._delegate.chomp(state, tracker)
+
+
+class ThunkChomper(abstract.AbstractChomper):
+    def __init__(self, thunk, fertile=True, name=None):
+        abstract.AbstractChomper.__init__(self, fertile=fertile, name=name)
+        self._thunk = thunk
+
+    def _chomp(self, state, tracker):
+        return self._thunk().chomp(state, tracker)

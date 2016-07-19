@@ -32,10 +32,11 @@ class FroTests(unittest.TestCase):
 
     def test_chain2(self):
         def func(parser):
-            openp = -fro.rgx("[a-z]+")
-            closep = -openp.dependent(lambda s: re.escape(s.upper()))
+            box = BoxedValue(None)
+            openp = fro.rgx("[a-z]+") | box.update
+            closep = fro.thunk(lambda: box.get().upper())
             children = fro.seq(parser) | (lambda l: 1 + sum(l))
-            return fro.comp([openp, children, closep]).get()
+            return fro.comp([-openp, children, -closep]).get()
         chained = fro.chain(func)
         l = ["abc", "efg", "EFG", "q", "Q", "ABC"]
         self.assertEqual(chained.parse(l), 3)
@@ -44,7 +45,6 @@ class FroTests(unittest.TestCase):
         self.assertEqual(chained.parse(l), 26)
         l = ["abc", "def", "DEF", "DEF"]
         self.assertRaises(fro.FroParseError, chained.parse, l)
-
 
     def test_compose1(self):
         rgxs = [fro.rgx(str(n)) | int for n in range(100)]
@@ -141,6 +141,19 @@ class FroTests(unittest.TestCase):
         actual = num_seq.parse_str(",8,8")
         self.assertIsNone(actual)
 
+    def test_thunk1(self):
+        box = BoxedValue(0)
+        thunkp = fro.thunk(lambda: str(box.update(box.get() + 1)))
+        for s in "12345":
+            self.assertEqual(thunkp.parse_str(s), s)
+
+    def test_thunk2(self):
+        box = BoxedValue(-1)
+        thunkp = fro.thunk(lambda: str(box.update(box.get() + 1)))
+        parser = fro.seq(thunkp, sep=r",")
+        l = [str(i) for i in range(20)]
+        self.assertEqual(parser.parse_str(",".join(l)), l)
+
     def test_tie1(self):
         def _func(parser):
             return fro.comp([r"~\(", parser.maybe(0), r"~\)"]) >>  (lambda x: x + 1)
@@ -167,33 +180,6 @@ class FroTests(unittest.TestCase):
         self.assertEqual(parser.parse(lines), True)
 
     # tests for parser methods
-
-    def test_dependent1(self):
-        p1 = fro.rgx(r"[abc]+!")
-        parser = fro.comp([p1, p1.dependent(lambda s: s)]) | "".join
-        s = "acc!acc!"
-        self.assertEqual(parser.parse_str(s), s)
-
-    def test_dependent2(self):
-        p1 = fro.rgx(r"[abc]+!")
-        parser = fro.comp([p1, p1.dependent(lambda s: s)]) | "".join
-        self.assertRaises(fro.FroParseError, parser.parse_str, "cb!aa!")
-
-    def test_dependent3(self):
-        p1 = fro.rgx(r"[a-z]+")
-
-        def _parser(string):
-            if len(string) > 0 and string[0] == "a":
-                return fro.rgx(r"TheFirstOneStartsWithA")
-            elif len(string) < 3:
-                return p1
-            return re.escape(string)
-
-        parser = fro.comp([p1, r"~,", p1.dependent(_parser)]) | (lambda _: 0)
-        self.assertEqual(parser.parse_str("ui,ou"), 0)
-        self.assertEqual(parser.parse_str("asdf,TheFirstOneStartsWithA"), 0)
-        self.assertEqual(parser.parse_str("qwerty,qwerty"), 0)
-        self.assertRaises(fro.FroParseError, parser.parse_str, "hello,goodbye")
 
     def test_lstrip1(self):
         parser = fro.intp.lstrip()
@@ -262,6 +248,20 @@ class FroTests(unittest.TestCase):
         for _ in range(100):
             n = random.getrandbits(100)
             self.assertEqual(fro.intp.parse_str(str(n)), n)
+
+
+# helpers and utilities
+
+class BoxedValue(object):
+    def __init__(self, value):
+        self._value = value
+
+    def update(self, value):
+        self._value = value
+        return value
+
+    def get(self):
+        return self._value
 
 if __name__ == "__main__":
     unittest.main()
