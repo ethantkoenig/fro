@@ -1,3 +1,4 @@
+from fro._implementation.iters import CheckableIterator
 from fro._implementation.location import Location
 
 
@@ -7,27 +8,32 @@ class ChompState(object):
     """
     def __init__(self, lines, column=0):
         """
-        :param lines: Stream<str>
+        :param lines: iterable<str>
         :param column: index at which to start
         """
-        self._lines = lines
+        self._lines = CheckableIterator(lines)
         self._column = column
+        self._line = -1
 
-        if self._lines.index() == -1 and self._lines.has_next():
+        if self._lines.has_next():
             self._curr = next(self._lines)
+            self._len_curr = len(self._curr)
+            self._line += 1
 
     def advance_to(self, column):
         #self._assert_valid_col(column)
         #if column < self._column:
         #    msg = "Cannot advance column from {0} to {1}".format(self._column, column)
         #    raise ValueError(msg)
-        while column == len(self._curr) and self._lines.has_next():
+        while column == self._len_curr and self._lines.has_next():
             self._curr = next(self._lines)
+            self._len_curr = len(self._curr)
+            self._line += 1
             column = 0  # "recurse" onto start of next line
         self._column = column
 
     def at_end(self):
-        return self._column == len(self._curr) and not self._lines.has_next()
+        return self._column == self._len_curr and not self._lines.has_next()
 
     def column(self):
         return self._column
@@ -36,10 +42,10 @@ class ChompState(object):
         return self._curr
 
     def line(self):
-        return self._lines.index()
+        return self._line
 
     def location(self):
-        return Location(self._lines.index(), self._column, self._curr)
+        return Location(self._line, self._column, self._curr)
 
     def reset_to(self, column):
         #self._assert_valid_col(column)

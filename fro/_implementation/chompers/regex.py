@@ -30,8 +30,8 @@ class RegexChomper(AbstractChomper):
         self._pattern = regex.pattern
 
     def _chomp(self, state, tracker):
-        col = state._column # state.column()
-        line = state._curr # state.current()
+        col = state._column  # state.column()
+        line = state._curr  # state.current()
         match = self._match(line, col)
         if match is None:
             msg = "Expected pattern \'{}\'".format(self._pattern)

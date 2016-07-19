@@ -1,10 +1,9 @@
 from builtins import object
 
 
-class Stream(object):
+class CheckableIterator(object):
     def __init__(self, container):
         self._iterator = iter(container)
-        self._index = -1
 
         self._current_value = None
         self._peeked_value = None
@@ -23,9 +22,6 @@ class Stream(object):
             return False
         return self._peek()
 
-    def index(self):
-        return self._index
-
     def __next__(self):
         if self._at_end:
             raise StopIteration
@@ -33,7 +29,6 @@ class Stream(object):
             self._current_value = self._peeked_value
         else:
             self._advance()
-        self._index += 1
         self._peeked_value_valid = False
         return self._current_value
 

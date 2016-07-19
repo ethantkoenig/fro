@@ -2,7 +2,7 @@ import re
 
 from builtins import bytes, str
 
-from fro._implementation import chompers, iters, parse_error
+from fro._implementation import chompers
 
 
 class FroParser(object):
@@ -22,7 +22,7 @@ class FroParser(object):
         :return: value parsed, or None if parse failed (and no exception was thrown)
         """
         tracker = chompers.abstract.FroParseErrorTracker()
-        state = chompers.state.ChompState(iters.Stream(lines))
+        state = chompers.state.ChompState(lines)
         box = self._chomper.chomp(state, tracker)
         if box is None:
             return self._failed_parse(state, tracker, False)
