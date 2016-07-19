@@ -28,13 +28,15 @@ class SequenceIterable(object):
         self._failed_lookahead = chomper._failed_lookahead
 
     def __iter__(self):
+        # This method is a common hotspot, so it is written for
+        # efficiency
         state = self._state
         element = self._element
         tracker = self._tracker
         sep = self._sep
 
-        rollback_line = state.line()
-        rollback_col = state.column()
+        rollback_line = state._line  # state.line()
+        rollback_col = state._column  # state.column()
         while True:
             box = element.chomp(state, tracker)
             if box is None:
@@ -43,8 +45,8 @@ class SequenceIterable(object):
                 state.reset_to(rollback_col)
                 return
             yield box.value
-            rollback_line = state.line()
-            rollback_col = state.column()
+            rollback_line = state._line  # state.line()
+            rollback_col = state._column  # state.column()
 
             if sep is not None:
                 box_ = sep.chomp(state, tracker)
