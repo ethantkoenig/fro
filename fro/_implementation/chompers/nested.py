@@ -5,25 +5,24 @@ from fro._implementation.chompers import abstract, chomp_error, regex
 from fro._implementation.chompers.box import Box
 
 class NestedChomper(abstract.AbstractChomper):
-    def __init__(self, open_regex_string, close_regex_func, reducer,
+    def __init__(self, open_regex_string, close_regex_string, reducer,
                  fertile=True, name=None):
         abstract.AbstractChomper.__init__(self, fertile, name)
         self._open_regex = re.compile(open_regex_string)
-        self._close_regex_func = close_regex_func
+        self._close_regex = re.compile(close_regex_string)
         self._reducer = reducer
 
     def _chomp(self, state, tracker):
         match = regex.regex_chomp(self._open_regex, state, tracker)
         if match is None:
             return None
-        close_regex = self._close_regex_func(match.group())
         err = self._err(
             self._open_regex.pattern,
-            close_regex.pattern,
+            self._close_regex.pattern,
             state.location(),
             tracker.current_name())
         state.advance_to(match.end())
-        iterable = NestedIterable(state, self._open_regex, close_regex,
+        iterable = NestedIterable(state, self._open_regex, self._close_regex,
                                   lambda: self._raise(err))
         iterator = iter(iterable)
         value = self._apply(tracker, state, self._reducer, iterator)

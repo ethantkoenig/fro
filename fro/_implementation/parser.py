@@ -176,7 +176,7 @@ def group_rgx(regex_string, name=None):
 def nested(open_regex_string, close_regex_string, reducer="".join, name=None):
     return FroParser(chompers.nested.NestedChomper(
         open_regex_string,
-        lambda _: re.compile(close_regex_string),
+        close_regex_string,
         reducer,
         name=name))
 
