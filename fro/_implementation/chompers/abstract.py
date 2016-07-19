@@ -22,14 +22,13 @@ class AbstractChomper(object):
         self._fertile = fertile
         self._name = name
 
-        self._last_parsed = None
+        if name is None:
+            self.chomp = self._chomp
+
         self._func = None
 
     def fertile(self):
         return self._fertile
-
-    def last_parsed(self):
-        return self._last_parsed
 
     def name(self):
         return self._name
@@ -51,6 +50,10 @@ class AbstractChomper(object):
         carbon._name = name
         carbon._last_parsed = None
         carbon._func = func_
+        if name is not None or func_ is not None:
+            carbon.chomp = AbstractChomper.chomp.__get__(carbon, AbstractChomper)
+        else:
+            carbon.chomp = carbon._chomp
         return carbon
 
     def unname(self):
@@ -75,7 +78,6 @@ class AbstractChomper(object):
         if box is not None:
             if self._func is not None:
                 box.value = self._func(box.value)
-            self._last_parsed = box.value
         if name is not None:
             tracker.revoke_name()
         return box
