@@ -1,4 +1,4 @@
-import re
+import io
 
 from builtins import bytes, str
 
@@ -32,6 +32,10 @@ class FroParser(object):
 
     def parse_str(self, string_to_parse, loud=True):
         return self.parse([string_to_parse], loud)
+
+    def parse_file(self, filename, encoding="utf-8", loud=True):
+        with io.open(filename, encoding=encoding) as file_to_parse:
+            return self.parse(file_to_parse, loud=loud)
 
     def name(self, name):
         """
