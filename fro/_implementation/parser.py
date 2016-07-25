@@ -96,7 +96,7 @@ class FroParser(object):
 
     def significant(self):
         """
-        :return: a significant copy of the
+        :return: a significant copy of the called parser
         """
         return FroParser(self._chomper.clone(significant=True))
 
