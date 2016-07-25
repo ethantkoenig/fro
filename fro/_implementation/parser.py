@@ -205,7 +205,7 @@ def until(regex_str, reducer="".join, name=None):
 
 # nothing before decimal or something before decimal
 _floatp = r"(-?\.[0-9]+)|(-?[0-9]+(\.[0-9]*)?)"
-floatp = (rgx(r"{}(e[-+]?[0-9]+)?".format(_floatp)) | float).name("float")
+floatp = (rgx(r"{}([eE][-+]?[0-9]+)?".format(_floatp)) | float).name("float")
 
 intp = (rgx(r"-?[0-9]+") | int).name("int")
 natp = (rgx(r"[0-9]+") | int).name("non-negative int")
