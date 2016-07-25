@@ -9,29 +9,29 @@ class FroParser(object):
     """
     An immutable parser
     """
-    def __init__(self, chomper, quiet=False):
+    def __init__(self, chomper):
         self._chomper = chomper
-        self._quiet = quiet
 
     # public interface
 
-    def parse(self, lines):
+    def parse(self, lines, loud=True):
         """
         Parses the string into an object
         :param lines: lines to parse
+        :param loud: if parsing failures should raise exceptions
         :return: value parsed, or None if parse failed (and no exception was thrown)
         """
         tracker = chompers.abstract.FroParseErrorTracker()
         state = chompers.state.ChompState(lines)
         box = self._chomper.chomp(state, tracker)
         if box is None:
-            return self._failed_parse(state, tracker, False)
+            return self._failed_parse(state, tracker, False, loud)
         elif not state.at_end():
-            return self._failed_parse(state, tracker, True)
+            return self._failed_parse(state, tracker, True, loud)
         return box.value
 
-    def parse_str(self, string_to_parse):
-        return self.parse([string_to_parse])
+    def parse_str(self, string_to_parse, loud=True):
+        return self.parse([string_to_parse], loud)
 
     def name(self, name):
         """
@@ -46,19 +46,13 @@ class FroParser(object):
             fertile=self._chomper.fertile(),
             name=self._chomper.name()))
 
-    def quiet(self):
-        return FroParser(self._chomper, quiet=True)
-
-    def loud(self):
-        return FroParser(self._chomper, quiet=False)
-
     def lstrip(self):
         if self._chomper.fertile():
             chomper = chompers.composition.CompositionChomper(
                 [chompers.regex.RegexChomper(r"\s*", fertile=False), self._chomper],
                 fertile=True,
                 name=self._chomper.name())
-            return FroParser(chomper, quiet=self._quiet).get()
+            return FroParser(chomper).get()
         return -((+self).lstrip())
 
     def rstrip(self):
@@ -67,7 +61,7 @@ class FroParser(object):
                 [self._chomper, chompers.regex.RegexChomper(r"\s*", fertile=False)],
                 fertile=True,
                 name=self._chomper.name())
-            return FroParser(chomper, quiet=self._quiet).get()
+            return FroParser(chomper).get()
         return -((+self).rstrip())
 
     def strip(self):
@@ -99,20 +93,20 @@ class FroParser(object):
 
     # internals
 
-    def _failed_parse(self, state, tracker, valid_value):
+    def _failed_parse(self, state, tracker, valid_value, loud):
         if valid_value:
             curr = state.current()
             col = state.column()
             msg = "Unexpected character {}".format(curr[col])
             chomp_err = chompers.chomp_error.ChompError(msg, state.location())
             tracker.report_error(chomp_err)
-        return self._raise(tracker.retrieve_error())
+        return self._raise(tracker.retrieve_error(), loud)
 
-    def _raise(self, err):
-        if self._quiet:
+    def _raise(self, err, loud):
+        if not loud:
             return None
         if err is None:
-            raise AssertionError()
+            raise AssertionError("err to raise is None")
         raise err
 
 

@@ -18,11 +18,15 @@ class FroTests(unittest.TestCase):
         self.assertRaises(fro.FroParseError, parser.parse_str, "ac")
 
     def test_alt2(self):
-        parser = fro.alt([r"[0-9]{3}", fro.intp]).quiet()
-        self.assertEqual(parser.parse_str("12"), 12)
-        self.assertEqual(parser.parse_str("358"), "358")
-        self.assertEqual(parser.parse_str("9876"), None)
-        self.assertEqual(parser.parse_str("234t"), None)
+        parser = fro.alt([r"[0-9]{3}", fro.intp])
+
+        def parse(s):
+            return parser.parse_str(s, loud=False)
+
+        self.assertEqual(parse("12"), 12)
+        self.assertEqual(parse("358"), "358")
+        self.assertEqual(parse("9876"), None)
+        self.assertEqual(parse("234t"), None)
 
     def test_chain1(self):
         def func(parser):
@@ -107,20 +111,20 @@ class FroTests(unittest.TestCase):
 
     def test_seq1(self):
         num = fro.rgx(r"[0-9]+") | int
-        num_seq = fro.seq(num, sep=",").quiet()
+        num_seq = fro.seq(num, sep=",")
         for n in range(10):
-            actual = num_seq.parse_str(",".join(str(x) for x in range(n)))
+            actual = num_seq.parse_str(",".join(str(x) for x in range(n)), loud=False)
             expected = list(range(n))
             self.assertEqual(actual, expected)
         for n in range(10):
-            actual = num_seq.parse_str(",".join(str(x) for x in range(n)) + ",")
+            actual = num_seq.parse_str(",".join(str(x) for x in range(n)) + ",", loud=False)
             expected = None
             self.assertEqual(actual, expected)
 
     def test_seq2(self):
-        sq = fro.seq("a+?", sep="a").quiet()
+        sq = fro.seq("a+?", sep="a")
         for n in range(20):
-            actual = sq.parse_str("a" * n)
+            actual = sq.parse_str("a" * n, loud=False)
             if n == 0:
                 expected = []
             elif n % 2 == 1:
@@ -137,8 +141,8 @@ class FroTests(unittest.TestCase):
 
     def test_seq_empty(self):
         num = fro.rgx(r"[0-9]+", "natural number")
-        num_seq = fro.seq(num, sep=r",").quiet()
-        actual = num_seq.parse_str(",8,8")
+        num_seq = fro.seq(num, sep=r",")
+        actual = num_seq.parse_str(",8,8", loud=False)
         self.assertIsNone(actual)
 
     def test_thunk1(self):
