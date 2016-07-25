@@ -46,24 +46,37 @@ class FroParser(object):
             significant=self._chomper.significant(),
             name=self._chomper.name()))
 
-    def lstrip(self):
-        chomper = chompers.composition.CompositionChomper(
-            [chompers.regex.RegexChomper(r"\s*", significant=False),
+    def append(self, value):
+        return FroParser(chompers.composition.CompositionChomper(
+            [self._chomper.clone(significant=True),
+             _extract(value).clone(significant=False)],
+            significant=self._chomper.significant(),
+            name=self._chomper.name())).get()
+
+    def prepend(self, value):
+        return FroParser(chompers.composition.CompositionChomper(
+            [_extract(value).clone(significant=False),
              self._chomper.clone(significant=True)],
             significant=self._chomper.significant(),
-            name=self._chomper.name())
-        return FroParser(chomper).get()
+            name=self._chomper.name())).get()
+
+    def lstrip(self):
+        return self.prepend(r"~\s*")
+
+    def lstrips(self):
+        return self.prepend(until(r"~[^\s]"))
 
     def rstrip(self):
-        chomper = chompers.composition.CompositionChomper(
-            [self._chomper.clone(significant=True),
-             chompers.regex.RegexChomper(r"\s*", significant=False)],
-            significant=self._chomper.significant(),
-            name=self._chomper.name())
-        return FroParser(chomper).get()
+        return self.append(r"~\s*")
+
+    def rstrips(self):
+        return self.append(until(r"~[^\s]"))
 
     def strip(self):
         return self.lstrip().rstrip()
+
+    def strips(self):
+        return self.lstrips().rstrips()
 
     def unname(self):
         return FroParser(self._chomper.unname())
@@ -199,8 +212,10 @@ def tie(func, name=None):
     return result
 
 
-def until(regex_str, reducer="".join, name=None):
-    return FroParser(chompers.until.UntilChomper(regex_str, reducer, name=name))
+def until(regex_str, reducer=lambda _: None, name=None):
+    rgx_str, significant = _parse_rgx(regex_str)
+    return FroParser(chompers.until.UntilChomper(rgx_str, reducer, name=name,
+                                                 significant=significant))
 
 
 # nothing before decimal or something before decimal

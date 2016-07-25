@@ -37,7 +37,7 @@ class FroTests(unittest.TestCase):
     def test_chain2(self):
         def func(parser):
             box = BoxedValue(None)
-            openp = fro.rgx("[a-z]+") | box.update
+            openp = fro.rgx("[a-z]+") | box.update_and_get
             closep = fro.thunk(lambda: box.get().upper())
             children = fro.seq(parser) | (lambda l: 1 + sum(l))
             return fro.comp([~openp, children, ~closep]).get()
@@ -147,13 +147,13 @@ class FroTests(unittest.TestCase):
 
     def test_thunk1(self):
         box = BoxedValue(0)
-        thunkp = fro.thunk(lambda: str(box.update(box.get() + 1)))
+        thunkp = fro.thunk(lambda: str(box.update_and_get(box.get() + 1)))
         for s in "12345":
             self.assertEqual(thunkp.parse_str(s), s)
 
     def test_thunk2(self):
         box = BoxedValue(-1)
-        thunkp = fro.thunk(lambda: str(box.update(box.get() + 1)))
+        thunkp = fro.thunk(lambda: str(box.update_and_get(box.get() + 1)))
         parser = fro.seq(thunkp, sep=r",")
         l = [str(i) for i in range(20)]
         self.assertEqual(parser.parse_str(",".join(l)), l)
@@ -175,13 +175,18 @@ class FroTests(unittest.TestCase):
 
     def test_until1(self):
         lines = ["sdf", "sdf", "a"]
-        parser = fro.comp([fro.until(r"a"), r"a"])
+        parser = fro.comp([fro.until(r"a", reducer="".join), r"a"])
         self.assertEqual(parser.parse(lines), ("sdfsdf", "a"))
 
     def test_until2(self):
         lines = "hello from a far place".split()
         parser = fro.until(r"zebra") | (lambda _: True)
         self.assertEqual(parser.parse(lines), True)
+
+    def test_until3(self):
+        lines = ["hello", "there", "big", "world"]
+        parser = fro.comp([~fro.until("i"), fro.seq(r"[a-z]+")]).get()
+        self.assertEqual(parser.parse(lines), ["ig", "world"])
 
     # tests for parser methods
 
@@ -191,6 +196,16 @@ class FroTests(unittest.TestCase):
         self.assertEqual(parser.parse_str("-78"), -78)
         self.assertRaises(fro.FroParseError, parser.parse_str, "45 ")
         self.assertRaises(fro.FroParseError, parser.parse_str, "\t34\n")
+
+    def test_lstrips1(self):
+        parser = fro.intp.lstrips()
+
+        def parse(s, sep=","):
+            return parser.parse(s.split(sep))
+        self.assertEqual(parse("  ,,  12,"), 12)
+        self.assertEqual(parse("-125"), -125)
+        self.assertRaises(fro.FroParseError, parse, " ,, 145, ")
+        self.assertRaises(fro.FroParseError, parse, "2\n")
 
     def test_map1(self):
         parser = fro.intp | (lambda x: x * x)
@@ -229,6 +244,15 @@ class FroTests(unittest.TestCase):
         self.assertRaises(fro.FroParseError, parser.parse_str, "\t094")
         self.assertRaises(fro.FroParseError, parser.parse_str, "-12")
 
+    def test_rstrips1(self):
+        parser = fro.floatp.rstrips()
+
+        def parse(s, sep=","):
+            return parser.parse(s.split(sep))
+        self.assertAlmostEqual(parse("3.5E2   , \t"), 3.5E2, 1e-3)
+        self.assertAlmostEqual(parse("3"), 3, 1e-3)
+        self.assertRaises(fro.FroParseError, parse, ",2")
+
     def test_strip1(self):
         parser = fro.rgx(r"abc").strip()
         self.assertEqual(parser.parse_str("abc"), "abc")
@@ -237,6 +261,16 @@ class FroTests(unittest.TestCase):
         self.assertEqual(parser.parse_str("abc "), "abc")
         self.assertRaises(fro.FroParseError, parser.parse_str, "ab c")
         self.assertEqual(fro.comp([parser]).get().parse_str("abc "), "abc")
+
+    def test_strips1(self):
+        parser = fro.rgx(r"[a-z]+").strips()
+
+        def parse(s, sep=","):
+            return parser.parse(s.split(sep))
+        self.assertEqual(parse("  ,  ,abc,,, \r"), "abc")
+        self.assertRaises(fro.FroParseError, parse, "  abc  ,  def\n")
+        self.assertRaises(fro.FroParseError, parse, "\n\n\r \t")
+
 
     # tests for built-in parsers
 
@@ -260,7 +294,7 @@ class BoxedValue(object):
     def __init__(self, value):
         self._value = value
 
-    def update(self, value):
+    def update_and_get(self, value):
         self._value = value
         return value
 
