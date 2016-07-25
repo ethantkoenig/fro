@@ -6,8 +6,8 @@ from fro._implementation.chompers.box import Box
 
 class NestedChomper(abstract.AbstractChomper):
     def __init__(self, open_regex_string, close_regex_string, reducer,
-                 fertile=True, name=None):
-        abstract.AbstractChomper.__init__(self, fertile, name)
+                 significant=True, name=None):
+        abstract.AbstractChomper.__init__(self, significant, name)
         self._open_regex = re.compile(open_regex_string)
         self._close_regex = re.compile(close_regex_string)
         self._reducer = reducer

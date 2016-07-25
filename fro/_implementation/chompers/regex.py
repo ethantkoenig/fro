@@ -6,8 +6,8 @@ from fro._implementation.chompers.box import Box
 
 class GroupRegexChomper(AbstractChomper):
 
-    def __init__(self, regex_str, fertile=True, name=None):
-        AbstractChomper.__init__(self, fertile, name)
+    def __init__(self, regex_str, significant=True, name=None):
+        AbstractChomper.__init__(self, significant, name)
         self._regex = re.compile(regex_str)
 
     def _chomp(self, state, tracker):
@@ -23,8 +23,8 @@ class RegexChomper(AbstractChomper):
     # This class is a hotspot, since it is the "base case" for nearly every other
     # type of chomper. For that reason, this class is implemented for efficiency.
 
-    def __init__(self, regex_string, fertile=True, name=None):
-        AbstractChomper.__init__(self, fertile, name)
+    def __init__(self, regex_string, significant=True, name=None):
+        AbstractChomper.__init__(self, significant, name)
         regex = re.compile(regex_string)
         self._match = regex.match
         self._pattern = regex.pattern

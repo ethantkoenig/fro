@@ -43,26 +43,24 @@ class FroParser(object):
         return FroParser(chompers.util.OptionalChomper(
             self._chomper,
             default=default,
-            fertile=self._chomper.fertile(),
+            significant=self._chomper.significant(),
             name=self._chomper.name()))
 
     def lstrip(self):
-        if self._chomper.fertile():
-            chomper = chompers.composition.CompositionChomper(
-                [chompers.regex.RegexChomper(r"\s*", fertile=False), self._chomper],
-                fertile=True,
-                name=self._chomper.name())
-            return FroParser(chomper).get()
-        return -((+self).lstrip())
+        chomper = chompers.composition.CompositionChomper(
+            [chompers.regex.RegexChomper(r"\s*", significant=False),
+             self._chomper.clone(significant=True)],
+            significant=self._chomper.significant(),
+            name=self._chomper.name())
+        return FroParser(chomper).get()
 
     def rstrip(self):
-        if self._chomper.fertile():
-            chomper = chompers.composition.CompositionChomper(
-                [self._chomper, chompers.regex.RegexChomper(r"\s*", fertile=False)],
-                fertile=True,
-                name=self._chomper.name())
-            return FroParser(chomper).get()
-        return -((+self).rstrip())
+        chomper = chompers.composition.CompositionChomper(
+            [self._chomper.clone(significant=True),
+             chompers.regex.RegexChomper(r"\s*", significant=False)],
+            significant=self._chomper.significant(),
+            name=self._chomper.name())
+        return FroParser(chomper).get()
 
     def strip(self):
         return self.lstrip().rstrip()
@@ -73,17 +71,17 @@ class FroParser(object):
     def get(self):
         return self >> (lambda x: x)
 
-    def __neg__(self):
+    def __invert__(self):
         """
-        :return: an infertile copy of the called parser
+        :return: an insignificant copy of the called parser
         """
-        return FroParser(self._chomper.clone(fertile=False))
+        return FroParser(self._chomper.clone(significant=False))
 
-    def __pos__(self):
+    def significant(self):
         """
-        :return: a fertile copy of the called parser
+        :return: a significant copy of the
         """
-        return FroParser(self._chomper.clone(fertile=True))
+        return FroParser(self._chomper.clone(significant=True))
 
     def __or__(self, func):
         return FroParser(self._chomper.clone(func=func))
@@ -129,7 +127,7 @@ def _extract(value):
 
 def _parse_rgx(regex_string):
     """
-    :return: a tuple of (modified regex_string, whether fertile)
+    :return: a tuple of (modified regex_string, whether significant)
     """
     if regex_string[0:1] == r"~":
         return regex_string[1:], False
@@ -162,9 +160,9 @@ def comp(parser_values, sep=None, name=None):
 
 
 def group_rgx(regex_string, name=None):
-    rgx_str, fertile = _parse_rgx(regex_string)
+    rgx_str, significant = _parse_rgx(regex_string)
     return FroParser(chompers.regex.GroupRegexChomper(
-        rgx_str, fertile=fertile, name=name))
+        rgx_str, significant=significant, name=name))
 
 
 def nested(open_regex_string, close_regex_string, reducer="".join, name=None):
@@ -176,9 +174,9 @@ def nested(open_regex_string, close_regex_string, reducer="".join, name=None):
 
 
 def rgx(regex_string, name=None):
-    rgx_str, fertile = _parse_rgx(regex_string)
+    rgx_str, significant = _parse_rgx(regex_string)
     return FroParser(chompers.regex.RegexChomper(
-        rgx_str, fertile=fertile, name=name))
+        rgx_str, significant=significant, name=name))
 
 
 def seq(parser_value, reducer=list, sep=None, name=None):

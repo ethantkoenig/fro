@@ -40,7 +40,7 @@ class FroTests(unittest.TestCase):
             openp = fro.rgx("[a-z]+") | box.update
             closep = fro.thunk(lambda: box.get().upper())
             children = fro.seq(parser) | (lambda l: 1 + sum(l))
-            return fro.comp([-openp, children, -closep]).get()
+            return fro.comp([~openp, children, ~closep]).get()
         chained = fro.chain(func)
         l = ["abc", "efg", "EFG", "q", "Q", "ABC"]
         self.assertEqual(chained.parse(l), 3)
@@ -52,7 +52,7 @@ class FroTests(unittest.TestCase):
 
     def test_compose1(self):
         rgxs = [fro.rgx(str(n)) | int for n in range(100)]
-        rgxs = [++rgx if i % 2 == 0 else --rgx for i, rgx in enumerate(rgxs)]
+        rgxs = [rgx.significant() if i % 2 == 0 else ~~rgx for i, rgx in enumerate(rgxs)]
         parser = fro.comp(rgxs) | sum
         actual = parser.parse_str("".join(str(i) for i in range(100)))
         expected = sum(i for i in range(100) if i % 2 == 0)
@@ -208,7 +208,7 @@ class FroTests(unittest.TestCase):
 
     def test_maybe1(self):
         maybep = fro.rgx(r"ab").maybe()
-        parser = fro.comp([-maybep, fro.intp]) >> (lambda x: x)
+        parser = fro.comp([~maybep, fro.intp]) >> (lambda x: x)
         for n in range(10):
             self.assertEqual(parser.parse_str(str(n)), n)
             self.assertEqual(parser.parse_str("ab{}".format(n)), n)

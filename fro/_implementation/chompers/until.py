@@ -6,8 +6,8 @@ from fro._implementation.chompers.box import Box
 
 
 class UntilChomper(AbstractChomper):
-    def __init__(self, regex_str, reducer, fertile=True, name=None):
-        AbstractChomper.__init__(self, fertile=fertile, name=name)
+    def __init__(self, regex_str, reducer, significant=True, name=None):
+        AbstractChomper.__init__(self, significant=significant, name=name)
         self._regex = re.compile(regex_str)
         self._reducer = reducer
 

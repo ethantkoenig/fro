@@ -3,8 +3,8 @@ from fro._implementation.chompers.abstract import AbstractChomper
 
 class CompositionChomper(AbstractChomper):
 
-    def __init__(self, chompers, separator=None, fertile=True, name=None):
-        AbstractChomper.__init__(self, fertile, name)
+    def __init__(self, chompers, separator=None, significant=True, name=None):
+        AbstractChomper.__init__(self, significant, name)
         self._chompers = list(chompers)
         self._separator = separator  # self._separator may be None
 
@@ -15,7 +15,7 @@ class CompositionChomper(AbstractChomper):
             box_ = chomper.chomp(state, tracker)
             if box_ is None:
                 return None
-            if chomper._fertile:
+            if chomper._significant:
                 values.append(box_.value)
             if i == length - 1:
                 box_.value = tuple(values)

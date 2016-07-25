@@ -5,8 +5,8 @@ from fro._implementation.chompers.box import Box
 class SequenceChomper(abstract.AbstractChomper):
 
     def __init__(self, element, reducer, separator=None,
-                 fertile=True, name=None):
-        abstract.AbstractChomper.__init__(self, fertile, name)
+                 significant=True, name=None):
+        abstract.AbstractChomper.__init__(self, significant, name)
         self._element = element
         self._reducer = reducer
         self._separator = separator  # self._separator may be None
