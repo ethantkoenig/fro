@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Examples &mdash; Fro 1.1.0 documentation</title>
+  <title>Examples &mdash; Fro 2.0.0 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
   
 
   
-    <link rel="top" title="Fro 1.1.0 documentation" href="index.html"/>
+    <link rel="top" title="Fro 2.0.0 documentation" href="index.html"/>
         <link rel="next" title="Reporting Bugs" href="report_bugs.html"/>
         <link rel="prev" title="Fro Interface" href="api.html"/> 
 
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                1.1.0
+                2.0.0
               </div>
             
           
@@ -83,11 +83,12 @@
             
                 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction to Fro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="parser.html">Parser Objects</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Fro 101</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Fro Interface</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Examples</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#example-1-email-addresses">Example 1: Email Addresses</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-2-tex">Example 2: TeX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-3-xml">Example 3: XML</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="report_bugs.html">Reporting Bugs</a></li>
@@ -137,6 +138,8 @@
             
   <div class="section" id="examples">
 <h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<p>These examples use the convention of appending variable names with <code class="docutils literal"><span class="pre">p</span></code> to denote
+that the variable is a parser.</p>
 <div class="section" id="example-1-email-addresses">
 <h2>Example 1: Email Addresses<a class="headerlink" href="#example-1-email-addresses" title="Permalink to this headline">¶</a></h2>
 <p>Suppose you are given a text file where each line is of the form:</p>
@@ -176,16 +179,15 @@ need generate an <code class="docutils literal"><span class="pre">EmailDirectory
 <p>Using fro, you can write code for parsing the text file in under ten lines:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># email address ::= &lt;local name&gt;@&lt;domain&gt;, where &lt;domain&gt; is &lt;something&gt;.&lt;something&gt;</span>
 <span class="n">emailaddrp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="s2">r&quot;[\w]+&quot;</span><span class="p">,</span> <span class="s2">r&quot;~@&quot;</span><span class="p">,</span> <span class="s2">r&quot;[\w]+\.[\w]+&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;email address&quot;</span><span class="p">)</span>\
-                 <span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">&gt;&gt;</span> <span class="n">EmailAddress</span>
-<span class="n">firstnamep</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[\w]+&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;first name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                 <span class="o">.</span><span class="n">strips</span><span class="p">()</span> <span class="o">&gt;&gt;</span> <span class="n">EmailAddress</span>
+<span class="n">firstnamep</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[\w]+&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;first name&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strips</span><span class="p">()</span>
 <span class="n">lastnamep</span> <span class="o">=</span> <span class="n">firstnamep</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;last name&quot;</span><span class="p">)</span>
 <span class="n">namep</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">firstnamep</span><span class="p">,</span> <span class="n">lastnamep</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;full name&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">Name</span>
 <span class="c1"># entry ::= &lt;full name&gt; : &lt;email address&gt;</span>
 <span class="n">entryp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">namep</span><span class="p">,</span> <span class="s2">r&quot;~:&quot;</span><span class="p">,</span> <span class="n">emailaddrp</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;directory entry&quot;</span><span class="p">)</span>
 <span class="n">emaildirp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">seq</span><span class="p">(</span><span class="n">entryp</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;directory&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">EmailDirectory</span>
 
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">emaildirp</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<span class="n">emaildirp</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Not only will this code exhibit the desired behavior, it will raise informative error messages when it encounters
@@ -237,11 +239,53 @@ a (simplified) TeX file into a <code class="docutils literal"><span class="pre">
 <span class="n">commandp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">namep</span><span class="p">,</span> <span class="n">argumentp</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TeX command&quot;</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">TexCommand</span>
 
 <span class="c1"># parser for TexDocument objects</span>
-<span class="n">elementp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">alt</span><span class="p">([</span><span class="n">commandp</span><span class="p">,</span> <span class="n">textp</span><span class="p">])</span>
-<span class="n">documentp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">seq</span><span class="p">(</span><span class="n">elementp</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">r&quot;\s+&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tex document&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">TexDocument</span>
+<span class="n">elementp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">alt</span><span class="p">([</span><span class="n">commandp</span><span class="p">,</span> <span class="n">textp</span><span class="p">])</span><span class="o">.</span><span class="n">strips</span><span class="p">()</span>
+<span class="n">documentp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">seq</span><span class="p">(</span><span class="n">elementp</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Tex document&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">TexDocument</span>
 
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">input_file</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">documentp</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">input_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+<span class="n">documentp</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="s2">&quot;input.txt&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-3-xml">
+<span id="xml-example"></span><h2>Example 3: XML<a class="headerlink" href="#example-3-xml" title="Permalink to this headline">¶</a></h2>
+<p><em>Disclaimer</em>: This is a more advanced example intended to highlight the powerful and expressive
+offerings of the Fro library. It is not intended to be a fully complete XML parser (it
+doesn&#8217;t support comments, for instance). If you actually needed to parse an XML file,
+you would be better off using a specialized library.</p>
+<p>Suppose you have a large XML file, and you want to parse it into a hierarchy of <code class="docutils literal"><span class="pre">XMLNode</span></code> objects,
+shown below:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">XmlNode</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">tail</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tag</span> <span class="o">=</span> <span class="n">tag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_text</span> <span class="o">=</span> <span class="n">text</span>  <span class="c1"># text appearing inside the node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_children</span> <span class="o">=</span> <span class="n">children</span>  <span class="c1"># list of XmlNodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tail</span> <span class="o">=</span> <span class="n">tail</span>  <span class="c1"># text appearing immediately after the node</span>
+</pre></div>
+</div>
+<p>With Fro, we can quickly write a declarative solution, and we get features such as
+informative error messages for free:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># Recognizes &lt;open&gt; tags, producing the tag name</span>
+<span class="n">open_tagp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;\w+&quot;</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;open tag&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">prepend</span><span class="p">(</span><span class="s2">r&quot;&lt;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">r&quot;&gt;&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">close_of_tag</span><span class="p">(</span><span class="n">tag_name</span><span class="p">):</span>
+    <span class="c1"># Regex for the &lt;/close&gt; tag of a given tag name</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="s2">&quot;&lt;/</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tag_name</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">xml_node_parser</span><span class="p">(</span><span class="n">recursive_parser</span><span class="p">):</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">BoxedValue</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># stores the tag name of the current XML node</span>
+    <span class="n">boxed_open_tagp</span> <span class="o">=</span> <span class="n">open_tagp</span><span class="o">.</span><span class="n">lstrips</span><span class="p">()</span> <span class="o">|</span> <span class="n">tag</span><span class="o">.</span><span class="n">update_and_get</span>
+    <span class="n">textp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="s2">r&quot;&lt;&quot;</span><span class="p">,</span> <span class="n">reducer</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;text&quot;</span><span class="p">)</span>
+    <span class="n">childrenp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">seq</span><span class="p">(</span><span class="n">recursive_parser</span><span class="p">)</span>
+    <span class="n">tailp</span> <span class="o">=</span> <span class="n">textp</span><span class="o">.</span><span class="n">name</span><span class="p">(</span><span class="s2">&quot;tail&quot;</span><span class="p">)</span>
+    <span class="n">boxed_close_tagp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">thunk</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">close_of_tag</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;close_tag&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">boxed_open_tagp</span><span class="p">,</span> <span class="n">textp</span><span class="p">,</span>
+                     <span class="n">childrenp</span><span class="p">,</span> <span class="o">~</span><span class="n">boxed_close_tagp</span><span class="p">,</span> <span class="n">tailp</span><span class="p">])</span> <span class="o">&gt;&gt;</span> <span class="n">XmlNode</span>
+
+
+<span class="n">xmlp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">xml_node_parser</span><span class="p">)</span>
+<span class="n">xmlp</span><span class="o">.</span><span class="n">parse_file</span><span class="p">(</span><span class="s2">&quot;input.xml&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -288,7 +332,7 @@ a (simplified) TeX file into a <code class="docutils literal"><span class="pre">
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.1.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

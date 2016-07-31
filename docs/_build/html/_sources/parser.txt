@@ -1,5 +1,5 @@
-Parser Objects
-==============
+Fro 101
+=======
 
 ``Parser`` objects are the workhorses of the fro module, providing all of the module's core parsing functionality.
 However, there are a few subtleties to how they operate, which will be discussed in this section.
@@ -7,7 +7,7 @@ However, there are a few subtleties to how they operate, which will be discussed
 Parsing via chomping
 --------------------
 
-Conceptually, a ``Parser`` object parses a string, it first attempts to "consume" an initial portion of the string,
+Conceptually, when a ``Parser`` object parses a string, it first attempts to "consume" an initial portion of the string,
 and from it produce a value. We will refer to this process (consuming an initial portion of the string and producing a
 value) as the parser "chomping" the string. The terminology evokes a useful mental image, and may also be part of an
 elaborate scheme to make a `Noam Chomsky <https://en.wikipedia.org/wiki/Noam_Chomsky>`_ pun.
@@ -16,28 +16,28 @@ If the parser is not successful in chomping the string, then it fails to parse i
 in *parsing* the string if (and only if) it consumed the *entire* string during chomping. This conceptual model will be
 useful for understanding what happens when ``Parser`` objects are combined into new parsers.
 
-As an example, ``fro.intp`` is a parser which consumes non-empty sequences of digits (or equivalently,
-the regular expression ``r"[0-9]+"``) and produces the corresponding ``int`` values. When parsing the string ``"2358"``
+As an example, ``fro.intp`` is a parser which consumes non-empty sequences of digits (and other things
+you might expect to see in an integer, like a leading minus sign) and produces the corresponding ``int`` values. When parsing the string ``"2358"``
 it will consume the initial portion ``"2358"`` (which happens to be the entire string), and from it produces
 the ``int`` value ``2358``. Since the parser consumes the entire string during chomping, the parse is successful.::
 
-  fro.intp.parse("2358")  # chomps "2358" producing 2358, a successful parse!
+  fro.intp.parse_str("2358")  # chomps "2358" producing 2358, a successful parse!
 
 When parsing the string ``"123abc"``, it will consume the initial portion ``"123"``, producing the ``int`` value
 ``123``. However, the parse will be unsuccessful since the remaining ``"abc"`` was not consumed.::
 
-  fro.intp.parse("123abc")  # chomps "123" producing 123, an unsuccessful parse
+  fro.intp.parse_str("123abc")  # chomps "123" producing 123, an unsuccessful parse
 
 Finally, when parsing the string ``"abc123"``, it will not be able to consume any part of the string, since there is no
 initial portion that contains only digits. Since ``fro.intp`` only consumes *non-empty* sequences of digits, it cannot
-consume an empty initial portion (which parsers are allowed to do).::
+consume an empty initial portion (which parsers are in general allowed to do).::
 
-  fro.intp.parse("abc123")  # cannot chomp anything, an unsuccessful parse
+  fro.intp.parse_str("abc123")  # cannot chomp anything, an unsuccessful parse
 
 Combining parsers: composition
 ------------------------------
 
-With this model in place, it is much easier to make sense of what happens when you combine multiple parsers together.
+With this model in place, it is much easier to make sense of what happens when you combine parsers together.
 As a case study, let's consider parser composition. Given two parsers ``p1`` and ``p2``, the composition of ``p1`` and
 ``p2`` is a new parser, separate from but dependent on ``p1`` and ``p2``. When chomping a string, it first has ``p1``
 attempt to chomp. If ``p1`` successfully chomps, then ``p2`` chomps on the remaining, unconsumed portion of the string.
@@ -47,9 +47,9 @@ that ``p1`` and ``p2`` consumed and produces the tuple ``(v1, v2)``.
 
 As an example, consider the following::
 
-  az_parser = fro.rgx(r"[a-z]*")  # consumes strings that match regex, produces consumed string
-  composition_parser = fro.comp([fro.intp, az_parser])  # composition of fro.intp and az_parser
-  composition_parser.parse("2357primes")
+  a_to_z = fro.rgx(r"[a-z]*")  # consumes, and then produces, strings that match regex
+  composition_parser = fro.comp([fro.intp, az_parser])  # composition of fro.intp and a_to_z
+  composition_parser.parse_str("2357primes")
 
 When ``composition_parser`` tries to chomp ``"2357primes"``, first ``fro.intp`` will consume ``"2357"`` (of off
 ``"2357primes"``) and produce ``2357``, then ``az_parser`` will consume ``"primes"`` (of off ``"primes"``, which is
@@ -60,7 +60,7 @@ string, it parses successfully.
 As another example::
 
   twoints_parser = fro.comp([fro.intp, fro.intp])
-  twoints_parser.parse("149")  # what will happen??
+  twoints_parser.parse_str("149")  # what will happen??
 
 When ``twoints_parser`` tries to chomp ``"149"``, the first ``fro.intp`` will consume ``"149"`` and produce ``149``.
 However, there will nothing left for the second ``fro.intp`` to consume, so it will not successfully chomp anything.
@@ -75,14 +75,13 @@ as many digits as possible while chomping.
 Finally, you can compose more than two parsers together. Consider the following::
 
     composition = fro.comp([fro.intp, fro.rgx(r"@"), fro.intp, fro.rgx(r"@"), fro.intp])
-    composition.parse("123@45@6")  # returns the tuple (123, "@", 45, "@", 6)
+    composition.parse_str("123@45@6")  # returns the tuple (123, "@", 45, "@", 6)
 
 When ``composition`` attempts to chomp ``"123@45@6"``, the first ``fro.intp`` consumes ``"123"`` and produces ``123``.
 Then, the remaining, unconsumed ``"@45@6"`` is given to the first ``r"@"`` parser to chomp, which consumes and produces
 ``"@"``. After this, the remaining, unconsumed ``"45@6"`` is given to the second ``fro.intp``, so it continues for each
 of the composition's children parsers. The children parsers produces the values ``123``, ``"@"``, ``45``, ``"@"``, and
 ``6`` respectively, so the composition produces the tuple ``(123, "@", 45, "@", 6)``.
-
 
 Parser significance
 -------------------
@@ -102,3 +101,59 @@ value produced by ``composition``.
 Parsers are significant by default. If a parser is insignificant, that only means that the values it produces will be ignored when it appears inside a
 composition. An insignificant parser will still produce a value if you directly call ``parse(..)`` on it, or if it
 appears in something other than a composition.
+
+Chunks
+------
+
+When parsing a large text file, it's preferable to not have to read the entire file into memory.
+Instead, iterating through the file one piece at a time leads to much better use of memory.
+
+To support efficient use of memory, Fro breaks the text it is parsing into "chunks". When a parser
+chomps, it chomps on one chunk at a time, and only moves to the next chunk once it has completely
+consumed the current one. Regular expression parsers, which are used to construct practically
+every other type of parser, can only operate inside a single chunk.
+
+Let's consider an example::
+
+    composition = fro.comp([r"abc", r"def"])
+
+    # the first argument to parse(..) is a collection of chunks to parse
+    composition.parse(["abcd", "ef"])
+    # This parse will fail. The first regex parser will chomp "abc" off of the first
+    # chunk "abcd", leaving "d" behind. The second regex parser will try to chomp off
+    # the remainder of the first chunk, but fail. Since regular expressions cannot
+    # "wrap" around to the next chunk if the current chunk is not fully consumed, it
+    # does not matter that "ef" are waiting for us in the second chunk.
+
+
+By default, the lines of a text file serve as the chunks of a file. If you want to
+split your input text into chunks some other way, you can pass any iterable collection of
+strings into a parser's ``parse(..)`` method, and the parser will treat each element
+as an individual chunk.
+
+Since a parser can only move onto the next chunk after it has completely consumed the current chunk,
+it is important that a parser can unambiguously decide how to parse a chunk before moving onto the
+next one. To make this more concrete, let's consider another example::
+
+    a_then_b = fro.comp([r"a", r"b"])
+    a_then_c = fro.comp([r"a", r"c"])
+
+    # fro.alt(..) constructs an alternation parser, see the docs for more info
+    ab_or_ac = fro.alt([a_then_b, a_then_c])
+
+    ab_or_ac.parse(["a", "c"])
+    # This parse will fail. The ab_or_ac parser will first try to parse with a_then_b.
+    # The r"a" regex will chomp the entire first chunk ("a"). When the r"b" regex tries
+    # to chomp the second chunk ("c"), it will fail. At this point, the parser has
+    # already advanced to the second chunk, so it has no way of returning to the first
+    # chunk to try chomping with a_then_c, so it fails immediately.
+
+In the above example, the parser can't know how to interpret the ``"a"`` in the first chunk without
+looking at the second chunk. That is, the parser doesn't know if the ``"a"`` is part of something that
+``a_then_b`` will recognize, or part of something that ``a_then_c`` will recognize. In this case,
+it blindly chooses ``a_then_b``, and fails.
+
+
+What about all of the above examples where we just called ``parser.parse_str``,
+and didn't worry about chunks? When called with the ``parse_str`` method, a parser
+treats the entire string as a single chunk.
