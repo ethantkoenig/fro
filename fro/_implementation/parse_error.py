@@ -5,28 +5,13 @@ class FroParseError(Exception):
     """
     An exception for parsing failures
     """
-    def __init__(self, chomp_errors, cause=None, filename=None):
+    def __init__(self, chomp_errors, cause=None):
         self._messages = [_message_of_chomp_error(ce) for ce in chomp_errors]
         self._location = chomp_errors[0].location()
         self._cause = cause
-        self._filename = filename
 
-    def __str__(self, index_from=1):
-        first_line = "At line {l}, column {c}".format(
-            l=self.line(index_from),
-            c=self.column(index_from))
-        if self._filename is not None:
-            first_line += " of " + self._filename
-
-        result = "\n".join([
-            first_line,
-            "\n".join(str(x) for x in self._messages),
-            self.context()])
-
-        if self._cause is not None:
-            result += "\n\nCaused by: " + str(self._cause)
-
-        return result
+    def __str__(self):
+        return self.to_str(index_from=1)
 
     def cause(self):
         return self._cause
@@ -39,14 +24,29 @@ class FroParseError(Exception):
     def column(self, index_from=1):
         return self._location.column() + index_from
 
-    def filename(self):
-        return self._filename
-
     def line(self, index_from=1):
         return self._location.line() + index_from
 
     def messages(self):
         return list(self._messages)
+
+    def to_str(self, index_from=1, filename=None):
+        first_line = "At line {l}, column {c}".format(
+            l=self.line(index_from),
+            c=self.column(index_from))
+        if filename is not None:
+            first_line += " of " + filename
+
+        result = "\n".join([
+            first_line,
+            "\n".join(str(x) for x in self._messages),
+            self.context()])
+
+        if self._cause is not None:
+            result += "\n\nCaused by: " + str(self._cause)
+
+        return result
+
 
 
 class Message(object):
