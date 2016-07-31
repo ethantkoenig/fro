@@ -1,6 +1,5 @@
 # coding=utf-8
 import random
-import re
 import unittest
 
 import fro
@@ -36,7 +35,7 @@ class FroTests(unittest.TestCase):
 
     def test_chain2(self):
         def func(parser):
-            box = BoxedValue(None)
+            box = fro.BoxedValue(None)
             openp = fro.rgx("[a-z]+") | box.update_and_get
             closep = fro.thunk(lambda: box.get().upper())
             children = fro.seq(parser) | (lambda l: 1 + sum(l))
@@ -146,29 +145,28 @@ class FroTests(unittest.TestCase):
         self.assertIsNone(actual)
 
     def test_thunk1(self):
-        box = BoxedValue(0)
+        box = fro.BoxedValue(0)
         thunkp = fro.thunk(lambda: str(box.update_and_get(box.get() + 1)))
         for s in "12345":
             self.assertEqual(thunkp.parse_str(s), s)
 
     def test_thunk2(self):
-        box = BoxedValue(-1)
+        box = fro.BoxedValue(-1)
         thunkp = fro.thunk(lambda: str(box.update_and_get(box.get() + 1)))
         parser = fro.seq(thunkp, sep=r",")
         l = [str(i) for i in range(20)]
         self.assertEqual(parser.parse_str(",".join(l)), l)
 
     def test_tie1(self):
-        def _func(parser):
-            return fro.comp([r"~\(", parser.maybe(0), r"~\)"]) >>  (lambda x: x + 1)
+        def _func(p):
+            return fro.comp([r"~\(", p.maybe(0), r"~\)"]) >> (lambda x: x + 1)
         parser = fro.tie(_func, name="knot")
         actual = parser.parse_str("((()))")
         self.assertEqual(actual, 3)
 
     def test_tie2(self):
-        def _func(parser):
-            return fro.comp([r"~a", fro.seq(parser), r"~b"]).get()
-
+        def _func(p):
+            return fro.comp([r"~a", fro.seq(p), r"~b"]).get()
         parser = fro.tie(_func, name="knot")
         actual = parser.parse_str("aababb")
         self.assertEqual(actual, [[], []])
@@ -290,16 +288,7 @@ class FroTests(unittest.TestCase):
 
 # helpers and utilities
 
-class BoxedValue(object):
-    def __init__(self, value):
-        self._value = value
 
-    def update_and_get(self, value):
-        self._value = value
-        return value
-
-    def get(self):
-        return self._value
 
 if __name__ == "__main__":
     unittest.main()
