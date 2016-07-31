@@ -152,6 +152,12 @@ parser.</p>
 <dt id="__invert__">
 <code class="descname">__invert__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#__invert__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new <code class="docutils literal"><span class="pre">Parser</span></code> that is equivalent to <code class="docutils literal"><span class="pre">self</span></code> but is insignificant.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">commap</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;,&quot;</span><span class="p">)</span>
+<span class="n">composition</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="o">~</span><span class="n">fro</span><span class="o">.</span><span class="n">intp</span><span class="p">,</span> <span class="o">~</span><span class="n">commap</span><span class="p">,</span> <span class="n">fro</span><span class="o">.</span><span class="n">intp</span><span class="p">])</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="n">composition</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;2,3&quot;</span><span class="p">)</span>  <span class="c1"># evaluates to 3</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -211,10 +217,10 @@ consumes any leading whitespace inside a single chunk. Equivalent to
 <span class="c1"># Will succeed, producing &quot;planet&quot;. Note that the leading whitespace is</span>
 <span class="c1"># confined to a single chunk (even though this chunk is different than</span>
 <span class="c1"># the chunk that &quot;planet&quot; appears in)</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">([</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;planet&quot;</span><span class="p">])</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;planet&quot;</span><span class="p">])</span>
 
 <span class="c1"># Will fail, leading whitespace is across multiple chunks</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">([</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">galaxy&quot;</span><span class="p">])</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">galaxy&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -223,8 +229,7 @@ consumes any leading whitespace inside a single chunk. Equivalent to
 <dt id="lstrips">
 <code class="descname">lstrips</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lstrips" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> object that is equivalent to <code class="docutils literal"><span class="pre">self</span></code>, but ignores and
-consumes any leading whitespace inside a single chunk. Equivalent to
-<code class="docutils literal"><span class="pre">fro.comp([r&quot;~\s*&quot;,</span> <span class="pre">self]).get()</span></code>.</p>
+consumes any leading whitespace across multiple chunks.</p>
 <p>Example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[a-z]+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrips</span><span class="p">()</span>
 
@@ -237,10 +242,11 @@ consumes any leading whitespace inside a single chunk. Equivalent to
 <span class="c1"># Will succeed, producing &quot;planet&quot;. Note that the leading whitespace is</span>
 <span class="c1"># confined to a single chunk (even though this chunk is different than</span>
 <span class="c1"># the chunk that &quot;planet&quot; appears in)</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">([</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;planet&quot;</span><span class="p">])</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;planet&quot;</span><span class="p">])</span>
 
-<span class="c1"># Will succeed, producing &quot;galaxy&quot;</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">([</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\r\r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">galaxy&quot;</span><span class="p">])</span>
+<span class="c1"># Will succeed, producing &quot;galaxy&quot;. Unlike lstrip(), lstrips() can handle</span>
+<span class="c1"># whitespace across multiple chunks</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\r\r</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">galaxy&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -292,7 +298,49 @@ the parse failed (or returns <code class="docutils literal"><span class="pre">No
 <dt id="rstrip">
 <code class="descname">rstrip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rstrip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> object that is equivalent to <code class="docutils literal"><span class="pre">self</span></code>, but ignores and
-consumes trailing whitespace.</p>
+consumes trailing whitespace. Equivalent to <code class="docutils literal"><span class="pre">fro.comp([self,</span> <span class="pre">r&quot;~\s*&quot;]).get()</span></code>.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[a-z]+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+<span class="c1"># Will succeed, producing &quot;hello&quot;. It&#39;s okay if there&#39;s no whitespace</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+
+<span class="c1"># Will succeed, producing &quot;world&quot;</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">(</span><span class="s2">&quot;world</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Will succeed, producing &quot;planet&quot;. Note that the trailing whitespace is</span>
+<span class="c1"># confined to a single chunk (even though this chunk is different than</span>
+<span class="c1"># the chunk that &quot;planet&quot; appears in)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="s2">&quot;planet&quot;</span><span class="p">,</span> <span class="s2">&quot;    &quot;</span><span class="p">])</span>
+
+<span class="c1"># Will fail, trailing whitespace is across multiple chunks</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="s2">&quot;galaxy</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="rstrips">
+<code class="descname">rstrips</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rstrips" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> object that is equivalent to <code class="docutils literal"><span class="pre">self</span></code>, but ignores and
+consumes any leading whitespace across multiple chunks.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[a-z]+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrips</span><span class="p">()</span>
+
+<span class="c1"># Will succeed, producing &quot;hello&quot;. It&#39;s okay if there&#39;s no whitespace</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+
+<span class="c1"># Will succeed, producing &quot;world&quot;</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">(</span><span class="s2">&quot;world</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Will succeed, producing &quot;planet&quot;.</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="s2">&quot;planet&quot;</span><span class="p">,</span> <span class="s2">&quot;   &quot;</span><span class="p">])</span>
+
+<span class="c1"># Will succeed, producing &quot;galaxy&quot;. Unlike rstrip(), rstrips() can handle</span>
+<span class="c1"># whitespace spread across multiple chunks</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="s2">&quot;galaxy</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\r\r</span><span class="s2">&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="method">
@@ -313,8 +361,9 @@ consumes leading and trailing whitespace inside a single chunk. <code class="doc
 <span class="c1"># This will succeed, producing &quot;abc&quot;. All whitespace is inside a single chunk.</span>
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">([</span><span class="s2">&quot;  abc  </span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">])</span>
 
-<span class="c1"># This will also succeed, producing &quot;abc&quot;. All leading whitespace is inside a single chunk,</span>
-<span class="c1"># as is all trailing whitespace (even though those chunks are different!)</span>
+<span class="c1"># This will also succeed, producing &quot;abc&quot;. All leading whitespace is inside</span>
+<span class="c1"># a single chunk, as is all trailing whitespace (even though those chunks</span>
+<span class="c1"># are different!)</span>
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">([</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;abc </span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">])</span>
 
 <span class="c1"># This will not succeed. Leading whitespace is spread across multiple chunks.</span>
@@ -335,12 +384,11 @@ leading adn trailing whitespace, across chunk boundaries. <code class="docutils 
 <span class="c1"># This will succeed, producing &quot;abc&quot;. All whitespace is inside a single chunk.</span>
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">([</span><span class="s2">&quot;  abc  </span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">])</span>
 
-<span class="c1"># This will also succeed, producing &quot;abc&quot;. All leading whitespace is inside a single chunk,</span>
-<span class="c1"># as is all trailing whitespace (even though those chunks are different!)</span>
+<span class="c1"># This will also succeed, producing &quot;abc&quot;.</span>
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">([</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;abc </span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">])</span>
 
-<span class="c1"># This will succeed, producing &quot;abc&quot;. Unlike strip(), strips() can handle whitespace that</span>
-<span class="c1"># spans multiple chunks.</span>
+<span class="c1"># This will succeed, producing &quot;abc&quot;. Unlike strip(), strips() can handle</span>
+<span class="c1"># whitespace that spans multiple chunks.</span>
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">([</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"> abc</span><span class="se">\t\r</span><span class="s2">&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
@@ -380,9 +428,10 @@ and producing the value producing by the first successful chomp, and failing if 
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">(</span><span class="s2">&quot;1234&quot;</span><span class="p">)</span>  <span class="c1"># fails</span>
 
 <span class="c1"># The last one is tricky. When r&quot;a*b*c*&quot; tries to chomp &quot;1234&quot;, it fails to chomp.</span>
-<span class="c1"># Then, when r&quot;[0-9]{3}&quot; tries to chomp &quot;1234&quot;, it chomps off &quot;123&quot;, leaving behind &quot;4&quot;</span>
-<span class="c1"># This is the first successful chomp, this is what the variable parser chomps. However,</span>
-<span class="c1"># since the variable parser did not chomp the entire string &quot;1234&quot;, it fails to parse it.</span>
+<span class="c1"># Then, when r&quot;[0-9]{3}&quot; tries to chomp &quot;1234&quot;, it chomps off &quot;123&quot;, leaving behind</span>
+<span class="c1"># &quot;4&quot;. This is the first successful chomp, so this is what the variable parser chomps.</span>
+<span class="c1"># However, since the variable parser did not chomp the entire string &quot;1234&quot;, it fails</span>
+<span class="c1"># to parse it.</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -394,7 +443,7 @@ and producing the value producing by the first successful chomp, and failing if 
 to a large number of successive calls to <code class="docutils literal"><span class="pre">func</span></code>.</p>
 <p>Conceptually, the returned parser is equivalent to <code class="docutils literal"><span class="pre">func(func(func(...)))</span></code>. During parsing,
 successive calls to <code class="docutils literal"><span class="pre">func</span></code> are made lazily on a as-needed basis.</p>
-<p>Fro parser parse top-down, so users of this function should take care to avoid left recursion.
+<p>Fro parsers parse top-down, so users of this function should take care to avoid left recursion.
 In general the parser <code class="docutils literal"><span class="pre">func(parser)</span></code> should consume input before delegating
 parsing to the <code class="docutils literal"><span class="pre">parser</span></code> argument.</p>
 <p>Example:</p>
@@ -432,8 +481,9 @@ will chomp with <code class="docutils literal"><span class="pre">sep</span></cod
 <dt id="group_rgx">
 <code class="descname">group_rgx</code><span class="sig-paren">(</span><em>regex_string</em><span class="optional">[</span>, <em>name=None</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#group_rgx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> that consumes the regular expression <code class="docutils literal"><span class="pre">regex_string</span></code>, and produces a tuple of the groups of
-the corresponding match. See the <a class="reference external" href="https://docs.python.org/2/library/re.html">re module</a> for a description of
-regular expression groups.</p>
+the corresponding match. Regular expressions should adhere to the syntax outlined in the
+<a class="reference external" href="https://docs.python.org/3/library/re.html">re module</a>. Also see the
+<a class="reference external" href="https://docs.python.org/3/library/re.html">re module</a> for a description of regular expression groups.</p>
 <p>Example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">group_rgx</span><span class="p">(</span><span class="s2">r&quot;(x*)(y*)(z*)&quot;</span><span class="p">)</span>
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">(</span><span class="s2">&quot;xxz&quot;</span><span class="p">)</span>  <span class="c1"># evaluates to (&quot;xx&quot;, &quot;&quot;, &quot;z&quot;)</span>
@@ -463,8 +513,9 @@ with ties going to opening tokens.</p>
 <dl class="function">
 <dt id="rgx">
 <code class="descname">rgx</code><span class="sig-paren">(</span><em>regex_string</em><span class="optional">[</span>, <em>name=None</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#rgx" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> that parses strings that match the given regular expression, and produces the string it
-consumed.</p>
+<dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> that parses strings that match the given regular expression, and produces
+the string it consumed. The regular expressions should adhere to the syntax outlined in the
+<a class="reference external" href="https://docs.python.org/3/library/re.html">re module</a></p>
 <p>Example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;abc+&quot;</span><span class="p">)</span>
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">(</span><span class="s2">&quot;abccc&quot;</span><span class="p">)</span>  <span class="c1"># evaluates to &quot;abccc&quot;</span>
@@ -524,6 +575,9 @@ whose structure matches the parsers returned by <code class="docutils literal"><
 cyclic parser, whereas <code class="docutils literal"><span class="pre">chain(func)</span></code> is a lazily-evaluated infinite parser.
 This difference is relevant only when the corresponding parsers are dependent on external state.
 In other cases, it is more memory-efficient to use <code class="docutils literal"><span class="pre">tie(func)</span></code>.</p>
+<p>Fro parsers parse top-down, so users of this function should take care to avoid left recursion.
+In general the parser <code class="docutils literal"><span class="pre">func(parser)</span></code> should consume input before delegating
+parsing to the <code class="docutils literal"><span class="pre">parser</span></code> argument.</p>
 <p>Since parsers are immutable, the only way to create a self-referencing parser is via <code class="docutils literal"><span class="pre">tie(..)</span></code>.</p>
 <p>Example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">parser</span><span class="p">):</span>
@@ -664,37 +718,32 @@ location of the error. This method is identical to <code class="docutils literal
 <dd><dl class="method">
 <dt id="BoxedValue.__init__">
 <code class="descname">__init__</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#BoxedValue.__init__" title="Permalink to this definition">¶</a></dt>
-<dt>
-<code class="descname">Initialize the box with ``value``</code></dt>
-<dd></dd></dl>
+<dd><p>Initialize the box with <code class="docutils literal"><span class="pre">value</span></code></p>
+</dd></dl>
 
 <dl class="method">
 <dt id="BoxedValue.get">
 <code class="descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#BoxedValue.get" title="Permalink to this definition">¶</a></dt>
-<dt>
-<code class="descname">Return the box's current value</code></dt>
-<dd></dd></dl>
+<dd><p>Return the box&#8217;s current value</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="BoxedValue.get_and_update">
 <code class="descname">get_and_update</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#BoxedValue.get_and_update" title="Permalink to this definition">¶</a></dt>
-<dt>
-<code class="descname">Update the box's value, and return the previous value</code></dt>
-<dd></dd></dl>
+<dd><p>Update the box&#8217;s value to <code class="docutils literal"><span class="pre">value</span></code>, and return the previous value</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="BoxedValue.update">
 <code class="descname">update</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#BoxedValue.update" title="Permalink to this definition">¶</a></dt>
-<dt>
-<code class="descname">Update the box's value</code></dt>
-<dd></dd></dl>
+<dd><p>Update the box&#8217;s value to <code class="docutils literal"><span class="pre">value</span></code></p>
+</dd></dl>
 
 <dl class="method">
 <dt id="BoxedValue.update_and_get">
 <code class="descname">update_and_get</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#BoxedValue.update_and_get" title="Permalink to this definition">¶</a></dt>
-<dt>
-<code class="descname">Update the box's value, and return the new value</code></dt>
-<dd></dd></dl>
+<dd><p>Update the box&#8217;s value to <code class="docutils literal"><span class="pre">value</span></code>, and return the new value</p>
+</dd></dl>
 
 </dd></dl>
 

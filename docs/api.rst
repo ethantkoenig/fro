@@ -17,6 +17,12 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
 
         Returns a new ``Parser`` that is equivalent to ``self`` but is insignificant.
 
+        Example::
+
+            commap = fro.rgx(r",")
+            composition = fro.comp([~fro.intp, ~commap, fro.intp]).get()
+            composition.parse("2,3")  # evaluates to 3
+
     .. py:method:: __or__(func)
 
        Returns a new ``Parser`` object that applies ``func`` to the values produced
@@ -70,16 +76,15 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
             # Will succeed, producing "planet". Note that the leading whitespace is
             # confined to a single chunk (even though this chunk is different than
             # the chunk that "planet" appears in)
-            parser.parse_str(["  ", "planet"])
+            parser.parse(["  ", "planet"])
 
             # Will fail, leading whitespace is across multiple chunks
-            parser.parse_str(["  ", "\tgalaxy"])
+            parser.parse(["  ", "\tgalaxy"])
 
     .. py:method:: lstrips()
 
         Returns a ``Parser`` object that is equivalent to ``self``, but ignores and
-        consumes any leading whitespace inside a single chunk. Equivalent to
-        ``fro.comp([r"~\s*", self]).get()``.
+        consumes any leading whitespace across multiple chunks.
 
         Example::
 
@@ -94,10 +99,11 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
             # Will succeed, producing "planet". Note that the leading whitespace is
             # confined to a single chunk (even though this chunk is different than
             # the chunk that "planet" appears in)
-            parser.parse_str(["  ", "planet"])
+            parser.parse(["  ", "planet"])
 
-            # Will succeed, producing "galaxy"
-            parser.parse_str(["  ", "\r\r", "\tgalaxy"])
+            # Will succeed, producing "galaxy". Unlike lstrip(), lstrips() can handle
+            # whitespace across multiple chunks
+            parser.parse(["  ", "\r\r", "\tgalaxy"])
 
     .. py:method:: maybe(default=None)
 
@@ -134,8 +140,48 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
 
     .. py:method:: rstrip()
 
-       Returns a ``Parser`` object that is equivalent to ``self``, but ignores and
-       consumes trailing whitespace.
+        Returns a ``Parser`` object that is equivalent to ``self``, but ignores and
+        consumes trailing whitespace. Equivalent to ``fro.comp([self, r"~\s*"]).get()``.
+
+        Example::
+
+            parser = fro.rgx(r"[a-z]+").rstrip()
+
+            # Will succeed, producing "hello". It's okay if there's no whitespace
+            parser.parse_str("hello")
+
+            # Will succeed, producing "world"
+            parser.parse_str("world\n")
+
+            # Will succeed, producing "planet". Note that the trailing whitespace is
+            # confined to a single chunk (even though this chunk is different than
+            # the chunk that "planet" appears in)
+            parser.parse(["planet", "    "])
+
+            # Will fail, trailing whitespace is across multiple chunks
+            parser.parse(["galaxy\t", "\r"])
+
+    .. py:method:: rstrips()
+
+        Returns a ``Parser`` object that is equivalent to ``self``, but ignores and
+        consumes any leading whitespace across multiple chunks.
+
+        Example::
+
+            parser = fro.rgx(r"[a-z]+").lstrips()
+
+            # Will succeed, producing "hello". It's okay if there's no whitespace
+            parser.parse_str("hello")
+
+            # Will succeed, producing "world"
+            parser.parse_str("world\n")
+
+            # Will succeed, producing "planet".
+            parser.parse(["planet", "   "])
+
+            # Will succeed, producing "galaxy". Unlike rstrip(), rstrips() can handle
+            # whitespace spread across multiple chunks
+            parser.parse(["galaxy\n\n", "  ", "\r\r"])
 
     .. py:method:: significant()
 
@@ -154,8 +200,9 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
             # This will succeed, producing "abc". All whitespace is inside a single chunk.
             parser.parse_str(["  abc  \t"])
 
-            # This will also succeed, producing "abc". All leading whitespace is inside a single chunk,
-            # as is all trailing whitespace (even though those chunks are different!)
+            # This will also succeed, producing "abc". All leading whitespace is inside
+            # a single chunk, as is all trailing whitespace (even though those chunks
+            # are different!)
             parser.parse_str(["\n\n", "abc \t"])
 
             # This will not succeed. Leading whitespace is spread across multiple chunks.
@@ -175,12 +222,11 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
             # This will succeed, producing "abc". All whitespace is inside a single chunk.
             parser.parse_str(["  abc  \t"])
 
-            # This will also succeed, producing "abc". All leading whitespace is inside a single chunk,
-            # as is all trailing whitespace (even though those chunks are different!)
+            # This will also succeed, producing "abc".
             parser.parse_str(["\n\n", "abc \t"])
 
-            # This will succeed, producing "abc". Unlike strip(), strips() can handle whitespace that
-            # spans multiple chunks.
+            # This will succeed, producing "abc". Unlike strip(), strips() can handle
+            # whitespace that spans multiple chunks.
             parser.parse_str(["\n\n", "\n abc\t\r"])
 
 Constructing Parsers
@@ -222,9 +268,10 @@ on them.
         parser.parse_str("1234")  # fails
 
         # The last one is tricky. When r"a*b*c*" tries to chomp "1234", it fails to chomp.
-        # Then, when r"[0-9]{3}" tries to chomp "1234", it chomps off "123", leaving behind "4"
-        # This is the first successful chomp, this is what the variable parser chomps. However,
-        # since the variable parser did not chomp the entire string "1234", it fails to parse it.
+        # Then, when r"[0-9]{3}" tries to chomp "1234", it chomps off "123", leaving behind
+        # "4". This is the first successful chomp, so this is what the variable parser chomps.
+        # However, since the variable parser did not chomp the entire string "1234", it fails
+        # to parse it.
 
 
 .. py:function:: chain(func[, name=None])
@@ -235,7 +282,7 @@ on them.
     Conceptually, the returned parser is equivalent to ``func(func(func(...)))``. During parsing,
     successive calls to ``func`` are made lazily on a as-needed basis.
 
-    Fro parser parse top-down, so users of this function should take care to avoid left recursion.
+    Fro parsers parse top-down, so users of this function should take care to avoid left recursion.
     In general the parser ``func(parser)`` should consume input before delegating
     parsing to the ``parser`` argument.
 
@@ -271,8 +318,9 @@ on them.
 .. py:function:: group_rgx(regex_string[, name=None])
 
     Returns a ``Parser`` that consumes the regular expression ``regex_string``, and produces a tuple of the groups of
-    the corresponding match. See the `re module <https://docs.python.org/2/library/re.html>`_ for a description of
-    regular expression groups.
+    the corresponding match. Regular expressions should adhere to the syntax outlined in the
+    `re module <https://docs.python.org/3/library/re.html>`_. Also see the
+    `re module <https://docs.python.org/3/library/re.html>`_ for a description of regular expression groups.
 
     Example::
 
@@ -301,8 +349,9 @@ on them.
 
 .. py:function:: rgx(regex_string[, name=None])
 
-    Returns a ``Parser`` that parses strings that match the given regular expression, and produces the string it
-    consumed.
+    Returns a ``Parser`` that parses strings that match the given regular expression, and produces
+    the string it consumed. The regular expressions should adhere to the syntax outlined in the
+    `re module <https://docs.python.org/3/library/re.html>`_
 
     Example::
 
@@ -358,6 +407,10 @@ on them.
     cyclic parser, whereas ``chain(func)`` is a lazily-evaluated infinite parser.
     This difference is relevant only when the corresponding parsers are dependent on external state.
     In other cases, it is more memory-efficient to use ``tie(func)``.
+
+    Fro parsers parse top-down, so users of this function should take care to avoid left recursion.
+    In general the parser ``func(parser)`` should consume input before delegating
+    parsing to the ``parser`` argument.
 
     Since parsers are immutable, the only way to create a self-referencing parser is via ``tie(..)``.
 
@@ -466,16 +519,21 @@ To facilitate creating parser that dependent on external state, the Fro module o
 .. py:class:: BoxedValue
 
     .. py:method:: __init__(value)
+
         Initialize the box with ``value``
 
     .. py:method:: get()
+
         Return the box's current value
 
     .. py:method:: get_and_update(value)
-        Update the box's value, and return the previous value
+
+        Update the box's value to ``value``, and return the previous value
 
     .. py:method:: update(value)
-        Update the box's value
+
+        Update the box's value to ``value``
 
     .. py:method:: update_and_get(value)
-        Update the box's value, and return the new value
+
+        Update the box's value to ``value``, and return the new value

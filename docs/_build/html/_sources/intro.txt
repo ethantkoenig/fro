@@ -30,7 +30,7 @@ correcting parsing issues.
 Installation
 ------------
 
-The easiest way to install Fro is via ``pip``::
+The easiest way to install Fro is via `pip <http://pypi.python.org/pypi/pip>`_::
 
   $ pip install fro
 
