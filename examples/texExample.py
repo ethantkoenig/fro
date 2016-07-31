@@ -41,5 +41,5 @@ argumentp = fro.group_rgx(r"\{([^\}]*?)\}").get().maybe()
 commandp = fro.comp([namep, argumentp], name="TeX command") >> TexCommand
 
 # parser for TexDocument objects
-elementp = fro.alt([commandp, textp])
-documentp = fro.seq(elementp, sep=r"\s+", name="Tex document") | TexDocument
+elementp = fro.alt([commandp, textp]).strips()
+documentp = fro.seq(elementp, name="Tex document") | TexDocument

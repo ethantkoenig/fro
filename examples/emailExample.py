@@ -30,8 +30,8 @@ class EmailDirectory(object):
 
 
 emailaddrp = fro.comp([r"[\w]+", r"~@", r"[\w]+\.[\w]+"], name="email address")\
-                 .strip() >> EmailAddress
-firstnamep = fro.rgx(r"[\w]+", name="first name").strip()
+                 .strips() >> EmailAddress
+firstnamep = fro.rgx(r"[\w]+", name="first name").strips()
 lastnamep = firstnamep.name("last name")
 namep = fro.comp([firstnamep, lastnamep], name="full name") >> Name
 entryp = fro.comp([namep, r"~:", emailaddrp], name="directory entry")

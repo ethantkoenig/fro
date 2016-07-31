@@ -1,24 +1,13 @@
 import fro
 import re
 
-class BoxedValue(object):
-    def __init__(self, value):
-        self._value = value
-
-    def update_and_get(self, value):
-        self._value = value
-        return value
-
-    def get(self):
-        return self._value
-
 
 class XmlNode(object):
     def __init__(self, tag, text, children, tail):
         self._tag = tag
-        self._text = text
+        self._text = text  # text appearing inside the node
         self._children = children  # list of XmlNodes
-        self._tail = tail
+        self._tail = tail  # text appearing immediately after the node
 
 
 # Recognizes <open> tags, producing the tag name
@@ -31,7 +20,7 @@ def close_of_tag(tag_name):
 
 
 def xml_node_parser(recursive_parser):
-    tag = BoxedValue(None)  # stores the tag name of the current XML node
+    tag = fro.BoxedValue(None)  # stores the tag name of the current XML node
     boxed_open_tagp = open_tagp.lstrips() | tag.update_and_get
     textp = fro.until(r"<", reducer="".join, name="text")
     childrenp = fro.seq(recursive_parser)
