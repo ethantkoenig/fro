@@ -164,7 +164,7 @@ parser.</p>
 <dt id="__or__">
 <code class="descname">__or__</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#__or__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a new <code class="docutils literal"><span class="pre">Parser</span></code> object that applies <code class="docutils literal"><span class="pre">func</span></code> to the values produced
-by <code class="docutils literal"><span class="pre">self</span></code>.</p>
+by <code class="docutils literal"><span class="pre">self</span></code>. The new parser has the same name and significance as <code class="docutils literal"><span class="pre">self</span></code>.</p>
 <p>Example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">intp</span> <span class="o">|</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">(</span><span class="s2">&quot;4&quot;</span><span class="p">)</span>  <span class="c1"># evaluates to 16</span>
@@ -178,6 +178,7 @@ by <code class="docutils literal"><span class="pre">self</span></code>.</p>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> object that unpacks the values produced by <code class="docutils literal"><span class="pre">self</span></code> and then applies <code class="docutils literal"><span class="pre">func</span></code> to
 them. Throws an error if the number of unpacked arguments does not equal a number of arguments that <code class="docutils literal"><span class="pre">func</span></code>
 can take, or if the value by produced <code class="docutils literal"><span class="pre">self</span></code> is not unpackable. Equivalent to <code class="docutils literal"><span class="pre">self</span> <span class="pre">|</span> <span class="pre">lambda</span> <span class="pre">x:</span> <span class="pre">func(*x)</span></code>.</p>
+<p>The new parser has the same name and significance as <code class="docutils literal"><span class="pre">self</span></code>.</p>
 <p>Example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">fro</span><span class="o">.</span><span class="n">intp</span><span class="p">,</span> <span class="s2">r&quot;~,&quot;</span><span class="p">,</span> <span class="n">fro</span><span class="o">.</span><span class="n">intp</span><span class="p">])</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="p">)</span>
 <span class="n">parser</span><span class="o">.</span><span class="n">parse_str</span><span class="p">(</span><span class="s2">&quot;4,5&quot;</span><span class="p">)</span>  <span class="c1"># evaluates to 9</span>
@@ -204,7 +205,7 @@ one element. Equivalent to <code class="docutils literal"><span class="pre">self
 <code class="descname">lstrip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lstrip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> object that is equivalent to <code class="docutils literal"><span class="pre">self</span></code>, but ignores and
 consumes any leading whitespace inside a single chunk. Equivalent to
-<code class="docutils literal"><span class="pre">fro.comp([r&quot;~\s*&quot;,</span> <span class="pre">self]).get()</span></code>.</p>
+<code class="docutils literal"><span class="pre">fro.comp([r&quot;~\s*&quot;,</span> <span class="pre">self]).get()</span></code>, but with the same name and significance as <code class="docutils literal"><span class="pre">self</span></code>.</p>
 <p>Example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[a-z]+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
 
@@ -273,14 +274,14 @@ chomping.</p>
 
 <dl class="method">
 <dt id="parse">
-<code class="descname">parse</code><span class="sig-paren">(</span><em>chunks</em>, <em>loud=True</em><span class="sig-paren">)</span><a class="headerlink" href="#parse" title="Permalink to this definition">¶</a></dt>
+<code class="descname">parse</code><span class="sig-paren">(</span><em>chunks</em><span class="optional">[</span>, <em>loud=True</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#parse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse an iterable collection of chunks. Returns the produced value, or throws a <code class="docutils literal"><span class="pre">FroParseError</span></code> explaining why
 the parse failed (or returns <code class="docutils literal"><span class="pre">None</span></code> if <code class="docutils literal"><span class="pre">loud</span></code> is <code class="docutils literal"><span class="pre">False</span></code>).</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="parse_file">
-<code class="descname">parse_file</code><span class="sig-paren">(</span><em>filename</em>, <em>encoding=&quot;utf-8&quot;</em>, <em>loud=True</em><span class="sig-paren">)</span><a class="headerlink" href="#parse_file" title="Permalink to this definition">¶</a></dt>
+<code class="descname">parse_file</code><span class="sig-paren">(</span><em>filename</em><span class="optional">[</span>, <em>encoding=&quot;utf-8&quot;</em>, <em>loud=True</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#parse_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse the contents of a file with the given filename, treating each line as a separate chunk.
 Returns the produced value, or throws a <code class="docutils literal"><span class="pre">FroParseError</span></code> explaining why
 the parse failed (or returns <code class="docutils literal"><span class="pre">None</span></code> if <code class="docutils literal"><span class="pre">loud</span></code> is <code class="docutils literal"><span class="pre">False</span></code>).</p>
@@ -288,7 +289,7 @@ the parse failed (or returns <code class="docutils literal"><span class="pre">No
 
 <dl class="method">
 <dt id="parse_str">
-<code class="descname">parse_str</code><span class="sig-paren">(</span><em>string_to_parse</em><span class="sig-paren">)</span><a class="headerlink" href="#parse_str" title="Permalink to this definition">¶</a></dt>
+<code class="descname">parse_str</code><span class="sig-paren">(</span><em>string_to_parse</em><span class="optional">[</span>, <em>loud=False</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#parse_str" title="Permalink to this definition">¶</a></dt>
 <dd><p>Attempts to parse <code class="docutils literal"><span class="pre">string_to_parse</span></code>. Treats the entire string <code class="docutils literal"><span class="pre">string_to_parse</span></code> as a single
 chunk. Returns the produced value, or throws a <code class="docutils literal"><span class="pre">FroParseError</span></code> explaining why
 the parse failed (or returns <code class="docutils literal"><span class="pre">None</span></code> if <code class="docutils literal"><span class="pre">loud</span></code> is <code class="docutils literal"><span class="pre">False</span></code>).</p>
@@ -298,7 +299,8 @@ the parse failed (or returns <code class="docutils literal"><span class="pre">No
 <dt id="rstrip">
 <code class="descname">rstrip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#rstrip" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> object that is equivalent to <code class="docutils literal"><span class="pre">self</span></code>, but ignores and
-consumes trailing whitespace. Equivalent to <code class="docutils literal"><span class="pre">fro.comp([self,</span> <span class="pre">r&quot;~\s*&quot;]).get()</span></code>.</p>
+consumes trailing whitespace. Equivalent to <code class="docutils literal"><span class="pre">fro.comp([self,</span> <span class="pre">r&quot;~\s*&quot;]).get()</span></code>, but with
+the same name and significance as <code class="docutils literal"><span class="pre">self</span></code>.</p>
 <p>Example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[a-z]+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
 
@@ -376,7 +378,7 @@ consumes leading and trailing whitespace inside a single chunk. <code class="doc
 <dt id="strips">
 <code class="descname">strips</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#strips" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a <code class="docutils literal"><span class="pre">Parser</span></code> object that is equivalent to <code class="docutils literal"><span class="pre">self</span></code>, but ignores and consumes
-leading adn trailing whitespace, across chunk boundaries. <code class="docutils literal"><span class="pre">self.strips()</span></code> is equivalent to
+leading and trailing whitespace, across chunk boundaries. <code class="docutils literal"><span class="pre">self.strips()</span></code> is equivalent to
 <code class="docutils literal"><span class="pre">self.lstrips().rstrips()</span></code>.</p>
 <p>Example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[a-z]+&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strips</span><span class="p">()</span>
@@ -404,13 +406,11 @@ instances.</p>
 <p>Many of these factory functions input &#8220;parser-like&#8221; values, or more commonly collections of &#8220;parser-like&#8221; values.
 A <code class="docutils literal"><span class="pre">Parser</span></code> object is a parser-like value, which corresponds to itself. A string <code class="docutils literal"><span class="pre">s</span></code> is also a parser-like value,
 and it corresponds to <code class="docutils literal"><span class="pre">fro.rgx(s)</span></code>. The decision to automatically cast string to regular expression parser is
-primarily intended to make code using the Fro module more concise.</p>
+primarily intended to make the client code using the Fro module more concise.</p>
 <p>To mark a &#8220;parser-like&#8221; regular expression as insignificant, prepend it with a tilde (<code class="docutils literal"><span class="pre">~</span></code>).
 If you actually want a regular expression that begins with a tilde, escape it (e.g. <code class="docutils literal"><span class="pre">r&quot;\~...&quot;</span></code>).
-This rule only applies to strings that are used
-as &#8220;parser-like&#8221; values, and not to the first argument of <cite>rgx</cite>, say.</p>
-<p>Since strings are not actually <code class="docutils literal"><span class="pre">Parser</span></code> objects, you can&#8217;t use any of the methods provided by the <code class="docutils literal"><span class="pre">Parser</span></code> class
-on them.</p>
+This rule only applies to strings that are used as &#8220;parser-like&#8221; values. It does not apply in other
+context where regular expression are used, such as the argument of <cite>rgx(..)</cite>.</p>
 <dl class="function">
 <dt id="alt">
 <code class="descname">alt</code><span class="sig-paren">(</span><em>parser_values</em><span class="optional">[</span>, <em>name=None</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#alt" title="Permalink to this definition">¶</a></dt>
@@ -590,6 +590,24 @@ parsing to the <code class="docutils literal"><span class="pre">parser</span></c
 </div>
 </dd></dl>
 
+<dl class="function">
+<dt id="until">
+<code class="descname">until</code><span class="sig-paren">(</span><em>regex_string</em><span class="optional">[</span>, <em>reducer=lambda _: None</em>, <em>name=None</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#until" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a parser that consumes all input until it encounters a match to the given regular expression,
+or the end of the input.</p>
+<p>The parser passes an iterator of the chunks it consumed to <code class="docutils literal"><span class="pre">reducer</span></code>, and produces the resulting
+value. By default, the parser produces <code class="docutils literal"><span class="pre">None</span></code>. The parser does not consume the match when parsing,
+but only everything up until the match.</p>
+<p>Example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">untilp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">until</span><span class="p">(</span><span class="s2">r&quot;a|b&quot;</span><span class="p">,</span>
+                   <span class="n">reducer</span><span class="o">=</span><span class="k">lambda</span> <span class="n">chunks</span><span class="p">:</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span> <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunks</span><span class="p">),</span>
+                   <span class="n">name</span><span class="o">=</span><span class="s2">&quot;until a or b&quot;</span><span class="p">)</span>
+<span class="n">parser</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="n">untilp</span><span class="p">,</span> <span class="s2">r&quot;apples&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;composition&quot;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">([</span><span class="s2">&quot;hello</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="s2">&quot;world</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;apples&quot;</span><span class="p">])</span>  <span class="c1"># evaluates to (12, apples)</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </div>
 <div class="section" id="built-in-parsers">
 <h2>Built-in Parsers<a class="headerlink" href="#built-in-parsers" title="Permalink to this headline">¶</a></h2>
@@ -621,7 +639,7 @@ parsing to the <code class="docutils literal"><span class="pre">parser</span></c
 </div>
 <div class="section" id="froparseerror">
 <h2>FroParseError<a class="headerlink" href="#froparseerror" title="Permalink to this headline">¶</a></h2>
-<p>Exceptions raised by the <code class="docutils literal"><span class="pre">parse(..)</span></code> method upon parsing failures.</p>
+<p><cite>FroParseError</cite> exceptions are raised by the <code class="docutils literal"><span class="pre">parse(..)</span></code> family of methods upon parsing failures.</p>
 <dl class="class">
 <dt id="FroParseError">
 <em class="property">class </em><code class="descname">FroParseError</code><span class="sig-paren">(</span><em>Exception</em><span class="sig-paren">)</span><a class="headerlink" href="#FroParseError" title="Permalink to this definition">¶</a></dt>

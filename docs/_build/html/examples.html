@@ -176,7 +176,7 @@ need generate an <code class="docutils literal"><span class="pre">EmailDirectory
         <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">entry_strings</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Using fro, you can write code for parsing the text file in under ten lines:</p>
+<p>Using Fro, you can write code for parsing the text file in under ten lines:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># email address ::= &lt;local name&gt;@&lt;domain&gt;, where &lt;domain&gt; is &lt;something&gt;.&lt;something&gt;</span>
 <span class="n">emailaddrp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">comp</span><span class="p">([</span><span class="s2">r&quot;[\w]+&quot;</span><span class="p">,</span> <span class="s2">r&quot;~@&quot;</span><span class="p">,</span> <span class="s2">r&quot;[\w]+\.[\w]+&quot;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;email address&quot;</span><span class="p">)</span>\
                  <span class="o">.</span><span class="n">strips</span><span class="p">()</span> <span class="o">&gt;&gt;</span> <span class="n">EmailAddress</span>
@@ -229,7 +229,7 @@ a (simplified) TeX file into a <code class="docutils literal"><span class="pre">
         <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>With fro, you can do this quickly and painlessly:</p>
+<p>With Fro, you can do this quickly and painlessly:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># parser for TexText objects</span>
 <span class="n">textp</span> <span class="o">=</span> <span class="n">fro</span><span class="o">.</span><span class="n">rgx</span><span class="p">(</span><span class="s2">r&quot;[^</span><span class="se">\\</span><span class="s2">s]+&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TeX text&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="n">TexText</span>
 

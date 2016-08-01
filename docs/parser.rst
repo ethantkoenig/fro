@@ -13,7 +13,7 @@ value) as the parser "chomping" the string. The terminology evokes a useful ment
 elaborate scheme to make a `Noam Chomsky <https://en.wikipedia.org/wiki/Noam_Chomsky>`_ pun.
 
 If the parser is not successful in chomping the string, then it fails to parse it. Otherwise, the parser is successful
-in *parsing* the string if (and only if) it consumed the *entire* string during chomping. This conceptual model will be
+in *parsing* the string if (and only if) it consumes the *entire* string during chomping. This conceptual model will be
 useful for understanding what happens when ``Parser`` objects are combined into new parsers.
 
 As an example, ``fro.intp`` is a parser which consumes non-empty sequences of digits (and other things
@@ -91,10 +91,10 @@ example, we might only care about the three int values, and not about the delimi
 To exclude some produced values from the resulting tuple of a composition, we can mark some of it's children as
 insignificant::
 
-    composition = fro.comp([fro.intp, -fro.rgx(r"@"), fro.intp, -fro.rgx(r"@"), fro.intp])
+    composition = fro.comp([fro.intp, ~fro.rgx(r"@"), fro.intp, ~fro.rgx(r"@"), fro.intp])
     composition.parse("123@45@6")  # returns the tuple (123, 45, 6)
 
-Here, the ``-fro.rgx(r"@")`` evaluates to an insignificant version of the parser ``fro.rgx(r"@")``; for more on the syntax of marking parsers as
+Here, the ``~fro.rgx(r"@")`` evaluates to an insignificant version of the parser ``fro.rgx(r"@")``; for more on the syntax of marking parsers as
 significant or insignificant, see :doc:`api`. What is important to notice is that the ``"@"`` value are not present in the tuple
 value produced by ``composition``.
 

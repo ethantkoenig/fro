@@ -46,7 +46,7 @@ need generate an ``EmailDirectory`` object from this file::
                              for (name, addr) in self.entries.items())
             return "\n".join(entry_strings)
 
-Using fro, you can write code for parsing the text file in under ten lines::
+Using Fro, you can write code for parsing the text file in under ten lines::
 
     # email address ::= <local name>@<domain>, where <domain> is <something>.<something>
     emailaddrp = fro.comp([r"[\w]+", r"~@", r"[\w]+\.[\w]+"], name="email address")\
@@ -100,7 +100,7 @@ a (simplified) TeX file into a ``TexDocument``::
         def __str__(self):
             return " ".join(str(e) for e in self.elements)
 
-With fro, you can do this quickly and painlessly::
+With Fro, you can do this quickly and painlessly::
 
     # parser for TexText objects
     textp = fro.rgx(r"[^\\s]+", name="TeX text") | TexText

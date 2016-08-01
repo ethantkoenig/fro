@@ -26,7 +26,7 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
     .. py:method:: __or__(func)
 
        Returns a new ``Parser`` object that applies ``func`` to the values produced
-       by ``self``.
+       by ``self``. The new parser has the same name and significance as ``self``.
 
        Example::
 
@@ -38,6 +38,8 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
         Returns a ``Parser`` object that unpacks the values produced by ``self`` and then applies ``func`` to
         them. Throws an error if the number of unpacked arguments does not equal a number of arguments that ``func``
         can take, or if the value by produced ``self`` is not unpackable. Equivalent to ``self | lambda x: func(*x)``.
+
+        The new parser has the same name and significance as ``self``.
 
         Example::
 
@@ -61,7 +63,7 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
 
         Returns a ``Parser`` object that is equivalent to ``self``, but ignores and
         consumes any leading whitespace inside a single chunk. Equivalent to
-        ``fro.comp([r"~\s*", self]).get()``.
+        ``fro.comp([r"~\s*", self]).get()``, but with the same name and significance as ``self``.
 
         Example::
 
@@ -121,18 +123,18 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
 
         Returns a ``Parser`` object equivalent to ``self``, but with the given name.
 
-    .. py:method:: parse(chunks, loud=True)
+    .. py:method:: parse(chunks[, loud=True])
 
         Parse an iterable collection of chunks. Returns the produced value, or throws a ``FroParseError`` explaining why
         the parse failed (or returns ``None`` if ``loud`` is ``False``).
 
-    .. py:method:: parse_file(filename, encoding="utf-8", loud=True)
+    .. py:method:: parse_file(filename[, encoding="utf-8", loud=True])
 
         Parse the contents of a file with the given filename, treating each line as a separate chunk.
         Returns the produced value, or throws a ``FroParseError`` explaining why
         the parse failed (or returns ``None`` if ``loud`` is ``False``).
 
-    .. py:method:: parse_str(string_to_parse)
+    .. py:method:: parse_str(string_to_parse[, loud=False])
 
         Attempts to parse ``string_to_parse``. Treats the entire string ``string_to_parse`` as a single
         chunk. Returns the produced value, or throws a ``FroParseError`` explaining why
@@ -141,7 +143,8 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
     .. py:method:: rstrip()
 
         Returns a ``Parser`` object that is equivalent to ``self``, but ignores and
-        consumes trailing whitespace. Equivalent to ``fro.comp([self, r"~\s*"]).get()``.
+        consumes trailing whitespace. Equivalent to ``fro.comp([self, r"~\s*"]).get()``, but with
+        the same name and significance as ``self``.
 
         Example::
 
@@ -212,7 +215,7 @@ For explanations of terminology like "chomp" "chunk" and "significant", see :doc
     .. py:method:: strips()
 
         Returns a ``Parser`` object that is equivalent to ``self``, but ignores and consumes
-        leading adn trailing whitespace, across chunk boundaries. ``self.strips()`` is equivalent to
+        leading and trailing whitespace, across chunk boundaries. ``self.strips()`` is equivalent to
         ``self.lstrips().rstrips()``.
 
         Example::
@@ -238,15 +241,12 @@ instances.
 Many of these factory functions input "parser-like" values, or more commonly collections of "parser-like" values.
 A ``Parser`` object is a parser-like value, which corresponds to itself. A string ``s`` is also a parser-like value,
 and it corresponds to ``fro.rgx(s)``. The decision to automatically cast string to regular expression parser is
-primarily intended to make code using the Fro module more concise.
+primarily intended to make the client code using the Fro module more concise.
 
 To mark a "parser-like" regular expression as insignificant, prepend it with a tilde (``~``).
 If you actually want a regular expression that begins with a tilde, escape it (e.g. ``r"\~..."``).
-This rule only applies to strings that are used
-as "parser-like" values, and not to the first argument of `rgx`, say.
-
-Since strings are not actually ``Parser`` objects, you can't use any of the methods provided by the ``Parser`` class
-on them.
+This rule only applies to strings that are used as "parser-like" values. It does not apply in other
+context where regular expression are used, such as the argument of `rgx(..)`.
 
 
 .. py:function:: alt(parser_values[, name=None])
@@ -423,6 +423,22 @@ on them.
         parser.parse("(((())))")  # evaluates to 4
         parser.parse("((()")  # fails
 
+.. py:function:: until(regex_string[, reducer=lambda _: None, name=None])
+
+    Returns a parser that consumes all input until it encounters a match to the given regular expression,
+    or the end of the input.
+
+    The parser passes an iterator of the chunks it consumed to ``reducer``, and produces the resulting
+    value. By default, the parser produces ``None``. The parser does not consume the match when parsing,
+    but only everything up until the match.
+
+    Example::
+
+        untilp = fro.until(r"a|b",
+                           reducer=lambda chunks: sum(len(chunk) for chunk in chunks),
+                           name="until a or b")
+        parser = fro.comp([untilp, r"apples"], name="composition")
+        parser.parse(["hello\n","world\n", "apples"])  # evaluates to (12, apples)
 
 
 Built-in Parsers
@@ -449,7 +465,7 @@ For convenience, the Fro module provides several common parsers.
 FroParseError
 -------------
 
-Exceptions raised by the ``parse(..)`` method upon parsing failures.
+`FroParseError` exceptions are raised by the ``parse(..)`` family of methods upon parsing failures.
 
 .. py:class:: FroParseError(Exception)
 
