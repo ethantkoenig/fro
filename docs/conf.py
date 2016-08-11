@@ -17,9 +17,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../'))
 
 # -- General configuration ------------------------------------------------
 
@@ -30,7 +30,7 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.coverage']
+extensions = ['sphinx.ext.coverage', 'sphinx.ext.autodoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -95,7 +95,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
 #
-# add_module_names = True
+add_module_names = False
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
@@ -331,3 +331,35 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #
 # texinfo_no_detailmenu = False
+
+
+def maybe_skip_member(app, what, name, obj, skip, options):
+    whitelisted_names = ["__or__", "__str__", "__rshift__", "__invert__"]
+    if name in whitelisted_names:
+        return False
+
+    blacklisted_names = ["Message"]
+    if name in blacklisted_names:
+        return True
+
+    if name == "__init__":
+        whitelisted_classes = ["BoxedValue"]
+        if any(x for x in whitelisted_classes if x + ".__init__" in str(obj)):
+            return False
+
+    return skip
+
+
+def setup(app):
+    app.connect('autodoc-skip-member', maybe_skip_member)
+
+
+# Monkey patch to omit variable values from being displayed
+from sphinx.ext.autodoc import ModuleLevelDocumenter, DataDocumenter
+
+
+def add_directive_header(self, sig):
+    ModuleLevelDocumenter.add_directive_header(self, sig)
+    # Rest of original method ignored
+
+DataDocumenter.add_directive_header = add_directive_header
